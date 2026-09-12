@@ -24,8 +24,8 @@
 #define ADVANCE()\
     do{\
     index++;\
-    if(index>= tokens.size())\
-        return Fail("Index bigger than tokensize", index); \
+    if(index > tokens.size())\
+        return Fail("Index bigger than tokensize", index-1); \
     std::cout << "Indexing at " << std::string(__func__) + "():" + std::to_string(index-1)+"\t\t" + __FILE__ + ":" + std::to_string(__LINE__) << "\n"; \
     } while(0)
 
