@@ -26,5 +26,5 @@ static int Add(int a, int b){
 // id is the index, this is predefined
 // the compiler will also add boudscheck
 kernel void AddNumbers(vector<int> a, vector<int> b, vector<int> c){
-    c[id] = Add(a[id], b[id])
+    c[id] = Add(a[id], b[id]);
 }
