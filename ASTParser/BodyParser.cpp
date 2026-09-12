@@ -27,7 +27,7 @@ Result<ForNode*> ASTParser::GetForNode(){
     TRY(expectSign('('));
 
     // get var def
-    uint specifiers = GetSpesifiers();
+    uint specifiers = TRY(GetSpesifiers());
     std::optional<TypeNode> type = TRY(GetType());
     if(!type)
         return Fail("Expected type",index);
@@ -59,7 +59,7 @@ Result<StatementNode*> ASTParser::GetStatementNode(){
     std::cout << "Getting statement at " << index<<std::endl;
     // return
     if(is<specifierToken>()){
-        uint specifiers = GetSpesifiers();
+        uint specifiers = TRY(GetSpesifiers());
         auto type = TRY(getToken<typeToken>())->type;
         std::string name = TRY(expectDefinision());
         return GetVarDefNode(name, type, specifiers);

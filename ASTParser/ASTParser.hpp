@@ -206,7 +206,7 @@ struct ASTParser{
             // now, get params
             std::vector<VarDefNode*> params;
             while(true){
-                uint specifier = GetSpesifiers();
+                uint specifier = TRY(GetSpesifiers());
                 TypeNode paramType = TRY(GetType());
 
                 auto name = TRY(expectDefinision());
@@ -249,11 +249,11 @@ struct ASTParser{
         return sn; 
     }
 
-    uint GetSpesifiers(){
+    Result<uint> GetSpesifiers(){
         uint specifiers = 0;
 
         while(auto n = tryGet<specifierToken>()){
-            index++;
+            ADVANCE();
             if(index >= tokens.size())
                 return 0;
             if(n->s == "static")
@@ -286,7 +286,7 @@ struct ASTParser{
             // now, get params
             std::vector<VarDefNode*> params;
             while(true){
-                uint specifier = GetSpesifiers();
+                uint specifier = TRY(GetSpesifiers());
                 TypeNode type = TRY(GetType());
 
                 if(!is<definisionToken>())
@@ -319,7 +319,7 @@ struct ASTParser{
             return TRY(GetStructNode());
         }
         else{
-            uint specifiers = GetSpesifiers();
+            uint specifiers = TRY(GetSpesifiers());
             TypeNode type = TRY(GetType());
             std::cout << "Got type, current index: "<<index<<"\n";
             std::string defname = TRY(expectDefinision());
