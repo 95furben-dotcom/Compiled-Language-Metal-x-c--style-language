@@ -1,0 +1,13 @@
+On alignment: you don't need Metal's struct rules at all, and this is the right instinct
+
+The fix isn't to fight MSL's alignment — it's to never let MSL's struct layout rules apply to your data in the first place. Don't emit struct declarations that get laid out by the compiler on either side. Instead, treat every _gpu buffer as a flat byte blob, and have your IR — not MSL, not C++ — decide the offset of every field, with whatever packing you want (fully packed, no padding at all, or any custom rule). Then both backends just do raw byte arithmetic against offsets your IR computed once and hands to both codegens as constants.
+
+Concretely, in MSL:
+
+all buffers will have this model:
+
+device uchar* buf [[buffer(0)]];
+    // your IR knows field "y" of struct "Foo" at array index i is at byte offset:
+    //   base = i * FOO_STRIDE (also IR-computed)
+    //   offset = base + FOO_Y_OFFSET
+    int y = *reinterpret_cast<device int*>(buf + i * FOO_STRIDE + FOO_Y_OFFSET);
