@@ -44,8 +44,14 @@ inline std::unexpected<ParseError> Fail(std::string msg, uint tokenIndex, std::s
 template<typename T>
 T* Ensure(Result<T*> node){
     static_assert(std::is_base_of<Node, T>(),"T must be a node");
+
+    if(node.has_value())
+        return node.value();
+
     T* errorNode = new T();
     errorNode->error = new ParseError(node.error());
+
+
     return errorNode;
 }
 
