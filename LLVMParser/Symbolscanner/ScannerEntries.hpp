@@ -41,8 +41,13 @@ struct VariableEntry{
 };
 
 struct StructEntry {
+    Path path;
+    std::vector<VariableEntry> fields;
+    std::vector<Path> dependencies;
+
+    llvm::Type* llvmType = nullptr;
     const StructNode* target;
-    StructEntry(const Path& path, const StructNode* target, llvm::LLVMContext )
+    StructEntry(const Path& path, const StructNode* target)
     : path(path),target(target), fields(), dependencies(){
         this->path.push_back(target->name);
         FindFieldsAndDepends(target);
@@ -61,10 +66,4 @@ struct StructEntry {
             }
         }
     }
-    
-    Path path;
-    std::vector<VariableEntry> fields;
-    std::vector<Path> dependencies;
-
-    llvm::Type llvmType;
 };

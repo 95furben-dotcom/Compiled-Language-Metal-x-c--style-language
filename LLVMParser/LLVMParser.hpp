@@ -37,11 +37,4 @@ void BuildNamespace(const NamespaceNode* program, std::vector<std::string> path)
 void BuldFunction(const FunctionNode* function, std::vector<std::string> path){
 
 }
-
-
-
-
-
-
-
 }

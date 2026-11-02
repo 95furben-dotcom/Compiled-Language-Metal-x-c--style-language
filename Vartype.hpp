@@ -24,7 +24,7 @@ struct Vartype{
     std::optional<PrimitiveType> primitivetype;
 
     std::optional<Path> structPath;
-    Vartype* vectorType; // is 
+    Vartype* vectorType; // 8 byte pointer to data 8 byte number for size 8 byte number for capasity 
 
     bool IsPrimitive(){
         return !structPath.has_value() && vectorType == nullptr;

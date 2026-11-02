@@ -69,7 +69,20 @@ struct Symbolscanner{
 
     uint GetVartypeSize(Vartype t, Path scope){
         if(t.IsPrimitive())
-            return 
+            return PrimitiveSize(t.primitivetype.value());
+        else if(t.vectorType){
+            return 24;
+        }else{
+            StructEntry entry = FindStruct(t.structPath.value(), scope).value();
+
+            uint sum = 0;
+            for(auto& f : entry.fields){
+                sum += GetVartypeSize(f.type, entry.path);
+            }
+            for(Path& f : entry.dependencies){
+                sum += GetVartypeSize(f.type, entry.path);
+            }
+        }
     }
 
     private:
