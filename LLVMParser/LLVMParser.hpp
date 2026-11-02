@@ -6,15 +6,42 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "../ASTParser/AST.hpp"
+#include "Symbolscanner/SymbolScanner.hpp"
 
-namespace LLVMParser{
-static llvm::LLVMContext ctx;
-static llvm::Module mod("program", ctx);
-static llvm::IRBuilder<> builder(ctx);
+struct LLVMParser{
+llvm::LLVMContext ctx;
+llvm::Module mod = llvm::Module("program", ctx);
+llvm::IRBuilder<> builder = llvm::IRBuilder<>(ctx);
 
-static auto ASTToLLVM(const NamespaceNode* program){
+Symbolscanner symbolScanner;
+
+LLVMParser(const NamespaceNode* program)
+: symbolScanner(program)
+{}
+
+static void ASTToLLVM(const NamespaceNode* program){
+    std::vector<std::string> path;
+    LLVMParser parser(program);
+    parser.BuildNamespace(program, path);
+}
+
+void BuildNamespace(const NamespaceNode* program, std::vector<std::string> path){
+    if(program->name != "program"){
+        path.push_back(program->name);
+    }
+    for (const DeclNode *decl : program->declarations) {
+        if()
+    }
+}
+
+void BuldFunction(const FunctionNode* function, std::vector<std::string> path){
 
 }
+
+
+
+
+
 
 
 }

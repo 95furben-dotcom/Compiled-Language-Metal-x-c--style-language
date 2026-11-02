@@ -313,7 +313,6 @@ struct ASTParser{
     }
 
     Result<MemberNode*> GetMemberNode(){
-        //std::cout<<"Getting membernode at index: "<<index<<std::endl;
         // function,  struct or variable definitions 
         if(is<structToken>()){
             return TRY(GetStructNode());

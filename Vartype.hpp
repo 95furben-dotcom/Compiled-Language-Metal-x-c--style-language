@@ -1,4 +1,5 @@
 #pragma once
+#include "LLVMParser/CodeGenError.hpp"
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -23,7 +24,7 @@ static PrimitiveType stringToPrimitiveType(std::string s){
 struct Vartype{
     std::optional<PrimitiveType> primitivetype;
 
-    std::optional<std::vector<std::string>> structPath;
+    std::optional<Path> structPath;
     Vartype* vectorType; // is 
 
     bool IsPrimitive(){
@@ -84,3 +85,31 @@ static std::string vartypeToString(Vartype t){
     
 }
 
+
+
+
+static uint PrimitiveSize(PrimitiveType v){
+    switch (v) {
+        case PrimitiveType::BOOL:
+        case PrimitiveType::CHAR:
+        return 1;
+        case PrimitiveType::SHORT:
+        case PrimitiveType::USHORT:
+        return 2;
+
+        case PrimitiveType::INT:
+        case PrimitiveType::UINT:
+        case PrimitiveType::FLOAT:
+        return 4;
+
+        case PrimitiveType::LONG:
+        case PrimitiveType::ULONG:
+        case PrimitiveType::DOUBLE:
+        return 8;
+
+        case PrimitiveType::VOID:
+            throw std::runtime_error("Can not get primitive size of VOID");
+        default:
+        throw std::runtime_error("Invalid type vartype");
+    }
+}
