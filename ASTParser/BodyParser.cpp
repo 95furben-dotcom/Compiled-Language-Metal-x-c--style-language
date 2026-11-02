@@ -56,7 +56,7 @@ Result<ForNode*> ASTParser::GetForNode(){
 
 
 Result<StatementNode*> ASTParser::GetStatementNode(){
-    std::cout << "Getting statement at " << index<<std::endl;
+    // std::cout << "Getting statement at " << index<<std::endl;
     // return
     if(is<specifierToken>()){
         uint specifiers = TRY(GetSpesifiers());

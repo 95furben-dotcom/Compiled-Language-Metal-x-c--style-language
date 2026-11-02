@@ -4,7 +4,9 @@
 
 #include "ASTParser/ASTParser.hpp"
 #include "ASTParser/Debug/ASTPrinter.hpp"
+#include <fstream>
 
+#include "LLVMParser/Function.hpp"
 
 int main(){
     std::string fileconts = ReadFile("ProjectFolder/goal.cl");

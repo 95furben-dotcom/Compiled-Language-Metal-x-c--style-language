@@ -321,9 +321,7 @@ struct ASTParser{
         else{
             uint specifiers = TRY(GetSpesifiers());
             TypeNode type = TRY(GetType());
-            std::cout << "Got type, current index: "<<index<<"\n";
             std::string defname = TRY(expectDefinision());
-            std::cout << "Got defname\n";
 
             if((specifiers&Specifiers::KERNEL) != 0)
                 return GetKernelDefinitionNode(defname);

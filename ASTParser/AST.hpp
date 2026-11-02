@@ -6,10 +6,6 @@
 #include <vector>
 #include "../Vartype.hpp"
 
-
-
-
-
 struct Node {
     virtual ~Node() = default;
     ParseError* error = nullptr;

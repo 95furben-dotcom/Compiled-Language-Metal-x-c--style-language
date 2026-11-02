@@ -6,7 +6,7 @@
 struct Symbolscanner{
     std::vector<StructEntry> structEntries;
     std::vector<FunctionEntry> functionEntries;
-
+    std::vector<FieldEntry> staticVariables;
 
     Symbolscanner(const NamespaceNode* program){
         GenerateInfos(program);
@@ -25,24 +25,24 @@ struct Symbolscanner{
     void GenerateFunctionInfos(const DeclNode* node, std::vector<std::string>& path){
         if(auto a = dynamic_cast<const StructNode*>(node)){
             path.push_back(a->name);
-            GenerateStructInfos(a, path);
+            GenerateFunctionInfos(a, path);
             path.pop_back();
         }
         if(auto a = dynamic_cast<const NamespaceNode*>(node)){
             path.push_back(a->name);
-            GenerateStructInfos(a, path);
+            GenerateFunctionInfos(a, path);
             path.pop_back();
         }
         if(auto a = dynamic_cast<const FunctionNode*>(node)){
-            
+            FunctionEntry e(path,a);
+            functionEntries.push_back(e);
         }
 
     }
 
-    private:
     void GenerateStructInfos(const DeclNode* node, std::vector<std::string>& path){
         if(auto a = dynamic_cast<const StructNode*>(node)){
-            structEntries.push_back(StructEntry(path, a));
+            structEntries.push_back(StructEntry(a,path));
 
             path.push_back(a->name);
             GenerateStructInfos(a, path);
@@ -54,4 +54,6 @@ struct Symbolscanner{
             path.pop_back();
         }
     }
+
+
 };
