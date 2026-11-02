@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build and run",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/compiler.sh ${workspaceFolder}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "METAL_DEVICE_WRAPPER_TYPE": "1"
+                }
+            }
+        }
+    ]
+}

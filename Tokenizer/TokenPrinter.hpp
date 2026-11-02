@@ -5,7 +5,10 @@
 #include <fstream>
 #include <vector>
 #include <memory>
-
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+namespace fs = std::filesystem;
 namespace TokenPrinter{
 static std::string printToken(const Token& t) {
     std::ostringstream out;
@@ -61,6 +64,8 @@ static void printTokens(const std::vector<std::unique_ptr<Token>>& tokens) {
 }
 
 static void tokensToFile(const std::vector<std::unique_ptr<Token>>& tokens, const std::string& filepath) {
+    fs::path p(filepath);
+    fs::create_directories(p.parent_path());
     std::ofstream file(filepath);
     if (!file.is_open())
         throw std::runtime_error("Could not open file at " + filepath);
