@@ -1,5 +1,4 @@
 #pragma once
-#include "LLVMParser/CodeGenError.hpp"
 #include <cstdint>
 #include <optional>
 #include <stdexcept>

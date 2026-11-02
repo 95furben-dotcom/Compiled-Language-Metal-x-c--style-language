@@ -8,6 +8,10 @@ mkdir -p .cache
 # Wiping build cache forces CMake to evaluate fresh flags
 rm -rf build 
 
+# move compile commands
+cp .cache/build/compile_commands.json compile_commands.json
+
+
 # Compile app
 echo "Compiling app..."
 # Configure (generates the build files and compile_commands.json)
@@ -18,6 +22,7 @@ cmake -B .cache/build \
 
 # Compile the project 
 cmake --build .cache/build
+
 
 
 # Run

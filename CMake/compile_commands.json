@@ -1,0 +1,38 @@
+[
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/ASTParser/BodyParser.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/ASTParser/BodyParser.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/ASTParser/BodyParser.cpp",
+  "output": "CMakeFiles/my_program.dir/ASTParser/BodyParser.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/ASTParser/ExprParser.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/ASTParser/ExprParser.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/ASTParser/ExprParser.cpp",
+  "output": "CMakeFiles/my_program.dir/ASTParser/ExprParser.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/ExprEmiter.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/ExprEmiter.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/ExprEmiter.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/ExprEmiter.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/FunctionEmiterOperational.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/FunctionEmiterOperational.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/FunctionEmiterOperational.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/FunctionEmiterOperational.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/FunctionEmtier.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/FunctionEmtier.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionEmiter/FunctionEmtier.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/FunctionEmiter/FunctionEmtier.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/main.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/main.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/main.cpp",
+  "output": "CMakeFiles/my_program.dir/main.cpp.o"
+}
+]
