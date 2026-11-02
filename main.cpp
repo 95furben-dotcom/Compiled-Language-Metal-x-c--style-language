@@ -1,4 +1,5 @@
 #include "FileHandler.hpp"
+#include "LLVMParser/Symbolscanner/SymbolScanner.hpp"
 #include "Tokenizer/Tokenizer.hpp"
 #include "Tokenizer/TokenPrinter.hpp"
 
@@ -13,5 +14,7 @@ int main(){
 
     NamespaceNode *program = ASTParser::TokensToProgram(tokens);
     ASTPrinter::writeToFile(program, "ProjectFolder/.cache/AST.txt");
+
+    Symbolscanner s(program);
 
 }

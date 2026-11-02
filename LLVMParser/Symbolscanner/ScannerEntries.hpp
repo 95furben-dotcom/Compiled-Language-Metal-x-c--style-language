@@ -12,43 +12,41 @@
 
 #include "../CodeGenError.hpp"
 
-struct FunctionEntry {
-    FunctionEntry(const Path &path, const Node *target,
-                Vartype returnType, const std::vector<Vartype> &parameters,
-                uint specifiers)
-      : path(path), target(target), returnType(std::move(returnType)),
-        parameters(parameters), specifiers(specifiers) {}
-
-    Path path;
+struct SymbolEntry{
     const Node *target;
+    Path path;
+    SymbolEntry(const Node* target, const Path& path, std::string name) : target(target), path(path) {
+        this->path.push_back(name);
+    }
+};
+
+struct FunctionEntry : virtual SymbolEntry{
+    FunctionEntry(const FunctionNode *target,const Path &path)
+      : SymbolEntry(target, path, target->name), returnType(std::move(target->returnType)),
+        parameters(target->params), specifiers(target->specifiers) {}
     Vartype returnType;
-    std::vector<Vartype> parameters;
+    std::vector<VarDefNode*> parameters;
 
   uint specifiers;
 };
 
-struct VariableEntry{
-    const VarDefNode* target;
-    Path path;
+struct VariableEntry : SymbolEntry{
     Vartype type;
     uint specifiers;
 
     VariableEntry(const VarDefNode* target, const Path& path)
-    : target(target), path(path), type(target->type), specifiers(target->specifiers)
-    {
-        this->path.push_back(target->name);
-    }
+    : SymbolEntry(target, path, target->name), type(target->type), specifiers(target->specifiers){}
 };
 
-struct StructEntry {
-    Path path;
+struct StructEntry : SymbolEntry{
     std::vector<VariableEntry> fields;
     std::vector<Path> dependencies;
 
     llvm::Type* llvmType = nullptr;
-    const StructNode* target;
-    StructEntry(const Path& path, const StructNode* target)
-    : path(path),target(target), fields(), dependencies(){
+
+    uint size; // bytes
+    StructEntry(const StructNode* target, const Path& path)
+    : SymbolEntry(target, path, target->name), fields(), dependencies(){
         this->path.push_back(target->name);
         FindFieldsAndDepends(target);
     };

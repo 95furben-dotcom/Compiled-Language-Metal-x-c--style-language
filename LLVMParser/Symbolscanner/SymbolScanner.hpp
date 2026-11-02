@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <set>
 #include <vector>
 
 #include "ScannerEntries.hpp"
@@ -14,6 +15,7 @@ struct Symbolscanner{
 
     Symbolscanner(const NamespaceNode* program){
         GenerateInfos(program);
+        ComputeSizes();
     }
 
     std::optional<StructEntry> FindStruct(const Path& dep, Path scope) const{
@@ -74,47 +76,92 @@ struct Symbolscanner{
             return 24;
         }else{
             StructEntry entry = FindStruct(t.structPath.value(), scope).value();
-
-            uint sum = 0;
-            for(auto& f : entry.fields){
-                sum += GetVartypeSize(f.type, entry.path);
-            }
-            for(Path& f : entry.dependencies){
-                sum += GetVartypeSize(f.type, entry.path);
-            }
+            return entry.size;
         }
     }
+
+
+    uint ComputeStructSize(const StructEntry& entry){
+        // all depenencies MUST BE computed 
+        uint size = 0;
+        if(auto t = dynamic_cast<const StructNode*>(entry.target)){
+            for(auto& d : t->members){
+                if(auto defnode = dynamic_cast<const VarDefNode*>(d)){
+                    // is struct: find size 
+                    size += GetVartypeSize(defnode->type, entry.path);
+                }
+            }
+            return size;
+        }
+
+        throw CodeGenError("Invalid target for struct");
+    }
+    
+    void ComputeSizes() {
+        std::set<std::string> resolved;
+        
+        // add primitive sizes first
+        // keep looping until all resolved
+        bool progress = true;
+        while(progress){
+            progress = false;
+            for(auto& info : structEntries){
+                std::string name = join(info.path, '.');
+                if(resolved.contains(name)) continue;
+                
+                // check if all dependencies are resolved
+                bool depsReady = true;
+                for(auto& dep : info.dependencies){
+                    auto depInfo =FindStruct(dep, info.path);
+                    if(!depInfo || !resolved.contains(join(depInfo->path, '.'))){
+                        depsReady = false;
+                        break;
+                    }
+                }
+                
+                if(depsReady){
+                    // compute size from fields
+                    info.size = ComputeStructSize(info);
+                    resolved.insert(name);
+                    progress = true;
+                }
+            }
+        }
+        
+        if(resolved.size() != structEntries.size())
+            throw CodeGenError("Circular struct dependency detected");
+    }
+
 
     private:
     void GenerateInfos(const NamespaceNode* program){
         structEntries = std::vector<StructEntry>();
 
-        Path path = {};
+        Path p{};
         for(auto*a : program->declarations){
-            GenerateStructInfos(a, path);
+            GenerateStructInfos(a, p);
         }
     }
 
-    void GenerateFunctionInfo(const FunctionNode* node, Path& path){
-        if(auto a = TryCast<FunctionNode>(node)){
+    void GenerateFunctionInfos(const DeclNode* node, Path& path){
+        if(auto a = TryCast<StructNode>(node)){
+            path.push_back(a->name);
+            GenerateStructInfos(a, path);
+            path.pop_back();
+        }
+        if(auto a = TryCast<NamespaceNode>(node)){
             path.push_back(a->name);
             GenerateStructInfos(a, path);
             path.pop_back();
         }
         if(auto a = TryCast<FunctionNode>(node)){
-            path.push_back(a->name);
-            GenerateStructInfos(a, path);
-            path.pop_back();
+            FunctionEntry e(a, path);
         }
-        if(auto a = TryCast<FunctionNode>(node)){
-            
-        }
-
     }
 
     void GenerateStructInfos(const DeclNode* node, Path& path){
         if(auto a = TryCast< StructNode>(node)){
-            structEntries.push_back(StructEntry(path, a));
+            structEntries.push_back(StructEntry(a, path));
 
             path.push_back(a->name);
             GenerateStructInfos(a, path);
