@@ -16,5 +16,6 @@ int main(){
     ASTPrinter::writeToFile(program, "ProjectFolder/.cache/AST.txt");
 
     Symbolscanner s(program);
+    s.
 
 }

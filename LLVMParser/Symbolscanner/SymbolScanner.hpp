@@ -160,14 +160,14 @@ struct Symbolscanner{
     }
 
     void GenerateStructInfos(const DeclNode* node, Path& path){
-        if(auto a = TryCast< StructNode>(node)){
+        if(auto a = TryCast<StructNode>(node)){
             structEntries.push_back(StructEntry(a, path));
 
             path.push_back(a->name);
             GenerateStructInfos(a, path);
             path.pop_back();
         }
-        if(auto a = TryCast< NamespaceNode>(node)){
+        if(auto a = TryCast<NamespaceNode>(node)){
             path.push_back(a->name);
             GenerateStructInfos(a, path);
             path.pop_back();

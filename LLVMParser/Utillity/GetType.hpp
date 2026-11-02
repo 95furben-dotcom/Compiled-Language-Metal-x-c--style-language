@@ -1,9 +1,8 @@
 #pragma once
-#include "LLVMParser.hpp"
-#include "Symbolscanner/SymbolScanner.hpp"
-#include "llvmParser.hpp"
+#include "../LLVMParser.hpp"
+#include "../Symbolscanner/SymbolScanner.hpp"
 #include "llvm/IR/Value.h"
-#include "../Vartype.hpp"
+#include "../../Vartype.hpp"
 
 static llvm::Type* getLLVMType(Vartype t, llvm::LLVMContext& ctx, const Symbolscanner& symbolScanner, const Path& scope)  {
     if(t.IsPrimitive()){
@@ -24,6 +23,6 @@ static llvm::Type* getLLVMType(Vartype t, llvm::LLVMContext& ctx, const Symbolsc
         }
     }
     if(t.structPath.has_value()){
-        return symbolScanner.FindStruct(t.structPath.value(), scope).;
+        return symbolScanner.FindStruct(t.structPath.value(), scope)->llvmType;
     }
 }

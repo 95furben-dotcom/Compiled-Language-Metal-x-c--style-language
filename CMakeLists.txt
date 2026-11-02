@@ -40,6 +40,7 @@ file(GLOB_RECURSE SRC_FILES *.cpp)
 # Filter out anything inside the .cache folder if it exists
 list(FILTER SRC_FILES EXCLUDE REGEX "/\\.cache/")
 list(FILTER SRC_FILES EXCLUDE REGEX "/\\build/")
+list(FILTER SRC_FILES EXCLUDE REGEX "/\\LLVMParser/FunctionEmiter/")
 
 add_executable(my_program ${SRC_FILES})
 
