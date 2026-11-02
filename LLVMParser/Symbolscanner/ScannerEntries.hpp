@@ -1,45 +1,58 @@
 #pragma once
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "../../ASTParser/AST.hpp"
 #include "../../ASTParser/Specifiers.hpp"
-#include "llvm/IR/DerivedTypes.h"
-struct SymboEntry {};
+#include "../Utillity/Caster.hpp"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Value.h"
 
-struct FunctionEntry  : virtual SymboEntry{
+#include "../CodeGenError.hpp"
 
+struct FunctionEntry {
+    FunctionEntry(const Path &path, const Node *target,
+                Vartype returnType, const std::vector<Vartype> &parameters,
+                uint specifiers)
+      : path(path), target(target), returnType(std::move(returnType)),
+        parameters(parameters), specifiers(specifiers) {}
+
+    Path path;
+    const Node *target;
+    Vartype returnType;
+    std::vector<Vartype> parameters;
+
+  uint specifiers;
 };
 
-struct StaticVarEntry : virtual SymboEntry{
-    bool isConst;
-};
-
-struct FieldEntry : virtual SymboEntry{
+struct VariableEntry{
     const VarDefNode* target;
-    std::vector<std::string> path;
+    Path path;
     Vartype type;
     uint specifiers;
 
-    FieldEntry(const VarDefNode* target, const std::vector<std::string>& path)
+    VariableEntry(const VarDefNode* target, const Path& path)
     : target(target), path(path), type(target->type), specifiers(target->specifiers)
     {
         this->path.push_back(target->name);
     }
 };
 
-struct StructEntry : virtual SymboEntry{
+struct StructEntry {
     const StructNode* target;
-    StructEntry(const std::vector<std::string>& path, const StructNode* target)
+    StructEntry(const Path& path, const StructNode* target, llvm::LLVMContext )
     : path(path),target(target), fields(), dependencies(){
         this->path.push_back(target->name);
         FindFieldsAndDepends(target);
     };
+
     void FindFieldsAndDepends(const StructNode* target){
         for(auto* member : target->members){ 
-            if(auto a = dynamic_cast<const VarDefNode*>(member)){
+            if(auto a = TryCast<VarDefNode>(member)){
                 if((a->specifiers & Specifiers::STATIC) == 0){
-                    FieldEntry f = FieldEntry(a, path);
+                    VariableEntry f = VariableEntry(a, path);
                     fields.push_back(f);
                     if(f.type.structPath.has_value()){
                         dependencies.push_back(f.type.structPath.value());
@@ -49,7 +62,9 @@ struct StructEntry : virtual SymboEntry{
         }
     }
     
-    std::vector<std::string> path;
-    std::vector<SymboEntry> fields;
-    std::vector<std::vector<std::string>> dependencies;
+    Path path;
+    std::vector<VariableEntry> fields;
+    std::vector<Path> dependencies;
+
+    llvm::Type llvmType;
 };
