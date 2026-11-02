@@ -8,7 +8,7 @@
 #include <vector>
 #include <sstream>
 
-
+using Path = std::vector<std::string>;
 enum class PrimitiveType : uint8_t { UCHAR, CHAR, BOOL, SHORT, USHORT, INT, UINT, FLOAT, LONG, ULONG, DOUBLE, VOID};
 static const std::vector<std::string> primitives = { "uchar","char", "bool", "short", "ushort", "int", "uint", "float", "long", "ulong", "double", "void"};
 
