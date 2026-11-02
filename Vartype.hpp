@@ -9,7 +9,7 @@
 
 
 enum class PrimitiveType : uint8_t { UCHAR, CHAR, BOOL, SHORT, USHORT, INT, UINT, FLOAT, LONG, ULONG, DOUBLE, VOID};
-inline const std::vector<std::string> primitives = { "uchar","char", "bool", "short", "ushort", "int", "uint", "float", "long", "ulong", "double", "void"};
+static const std::vector<std::string> primitives = { "uchar","char", "bool", "short", "ushort", "int", "uint", "float", "long", "ulong", "double", "void"};
 
 static PrimitiveType stringToPrimitiveType(std::string s){
     for(uint8_t i = 0; i < primitives.size(); i++){
