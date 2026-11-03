@@ -3,18 +3,19 @@
 #include <set>
 #include <vector>
 
-#include "ScannerEntries.hpp"
+#include "SymbolEntries.hpp"
 #include "../../ASTParser/AST.hpp"
 
 #include "../Utillity/Caster.hpp"
-struct Symbolscanner{
+struct SymbolScanner{
     std::vector<StructEntry> structEntries;
     std::vector<FunctionEntry> functionEntries;
     std::vector<VariableEntry> staticVariableEntries;
+    std::vector<KernelEntry> kernelEntries;
 
 
-    Symbolscanner(const NamespaceNode* program){
-        GenerateInfos(program);
+    SymbolScanner(const NamespaceNode* program){
+        GenerateNamespaceSymbols(program);
         ComputeSizes();
     }
 
@@ -134,43 +135,50 @@ struct Symbolscanner{
 
 
     private:
-    void GenerateInfos(const NamespaceNode* program){
+    void GenerateNamespaceSymbols(const NamespaceNode* program, Path path = {}){
         structEntries = std::vector<StructEntry>();
+        functionEntries = std::vector<FunctionEntry>();
+        staticVariableEntries = std::vector<VariableEntry>();
 
-        Path p{};
-        for(auto*a : program->declarations){
-            GenerateStructInfos(a, p);
+        for(auto* node : program->declarations){
+            if(auto a = TryCast<StructNode>(node)){
+                path.push_back(a->name);
+                GenerateStructInfos(a, path);
+                path.pop_back();
+            }
+            if(auto a = TryCast<NamespaceNode>(node)){
+                path.push_back(a->name);
+                GenerateNamespaceSymbols(a, path);
+                path.pop_back();
+            }
+            if(auto a = TryCast<FunctionNode>(node)){
+                FunctionEntry e(a, path);
+                functionEntries.push_back(e);
+            }
+            if(auto a = TryCast<KernelDefinitionNode>(node)){
+                KernelEntry e(a, path);
+                kernelEntries.push_back(e);
+            }
         }
     }
 
-    void GenerateFunctionInfos(const DeclNode* node, Path& path){
-        if(auto a = TryCast<StructNode>(node)){
-            path.push_back(a->name);
-            GenerateStructInfos(a, path);
-            path.pop_back();
-        }
-        if(auto a = TryCast<NamespaceNode>(node)){
-            path.push_back(a->name);
-            GenerateStructInfos(a, path);
-            path.pop_back();
-        }
-        if(auto a = TryCast<FunctionNode>(node)){
-            FunctionEntry e(a, path);
-        }
-    }
+    void GenerateStructInfos(const StructNode* node, Path& path){
+        for(auto* m : node->members){
+            if(auto a = TryCast<StructNode>(m)){
+                structEntries.push_back(StructEntry(a, path));
 
-    void GenerateStructInfos(const DeclNode* node, Path& path){
-        if(auto a = TryCast<StructNode>(node)){
-            structEntries.push_back(StructEntry(a, path));
-
-            path.push_back(a->name);
-            GenerateStructInfos(a, path);
-            path.pop_back();
-        }
-        if(auto a = TryCast<NamespaceNode>(node)){
-            path.push_back(a->name);
-            GenerateStructInfos(a, path);
-            path.pop_back();
+                path.push_back(a->name);
+                GenerateStructInfos(a, path);
+                path.pop_back();
+            }
+            if(auto a = TryCast<FunctionNode>(m)){
+                FunctionEntry e(a, path);
+                functionEntries.push_back(e);
+            }
+            if(auto a = TryCast<KernelDefinitionNode>(m)){
+                KernelEntry e(a, path);
+                kernelEntries.push_back(e);
+            }
         }
     }
 };

@@ -18,6 +18,8 @@ struct SymbolEntry{
     SymbolEntry(const Node* target, const Path& path, std::string name) : target(target), path(path) {
         this->path.push_back(name);
     }
+    virtual ~SymbolEntry() = default;   // <-- add this
+
 };
 
 struct FunctionEntry : virtual SymbolEntry{
@@ -64,4 +66,11 @@ struct StructEntry : SymbolEntry{
             }
         }
     }
+};
+
+struct KernelEntry : virtual SymbolEntry{
+    KernelEntry(const KernelDefinitionNode *target,const Path &path)
+      : SymbolEntry(target, path, target->name),
+        parameters(target->params) {}
+    std::vector<VarDefNode*> parameters;
 };
