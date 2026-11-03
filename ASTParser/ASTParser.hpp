@@ -319,13 +319,13 @@ struct ASTParser{
         }
         else{
             uint specifiers = TRY(GetSpesifiers());
-            TypeNode type = TRY(GetType());
-            std::cout << "Got type, current index: "<<index<<"\n";
-            std::string defname = TRY(expectDefinision());
-            std::cout << "Got defname\n";
 
-            if((specifiers&Specifiers::KERNEL) != 0)
+            if((specifiers & Specifiers::KERNEL) != 0){
+                std::string defname = TRY(expectDefinision());
                 return GetKernelDefinitionNode(defname);
+            }
+            TypeNode type = TRY(GetType());
+            std::string defname = TRY(expectDefinision());
 
             auto sign = tryGet<signToken>();
             if(sign != nullptr && sign->c == '('){
