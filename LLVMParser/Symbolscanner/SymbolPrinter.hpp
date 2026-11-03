@@ -33,8 +33,8 @@ inline std::string pathToJson(const Path& p) {
 inline std::string specifiersToJson(uint spec) {
     std::vector<std::string> names;
     if (spec & Specifiers::STATIC) names.push_back("static");
-    // if (spec & Specifiers::CONST)  names.push_back("const");
-    // if (spec & Specifiers::INLINE) names.push_back("inline");
+    if (spec & Specifiers::CONST)  names.push_back("const");
+    if (spec & Specifiers::INLINE) names.push_back("inline");
 
     std::string out = "[";
     for (size_t i = 0; i < names.size(); i++) {
@@ -103,13 +103,15 @@ inline std::string toJson(const StructEntry& e, int lvl = 0) {
 inline std::string toJson(const KernelEntry& e, int lvl = 0) {
     std::string in = pad(lvl + 1);
     std::string s = "{\n";
-    s += in + "\"kind\": \"function\",\n";
+    s += in + "\"kind\": \"kernelFunction\",\n";
     s += in + "\"path\": " + pathToJson(e.path) + ",\n";
     s += in + "\"parameters\": [";
     for (size_t i = 0; i < e.parameters.size(); i++) {
         if (i) s += ", ";
         s += "{\"name\": \"" + esc(e.parameters[i]->name) + "\", \"type\": "
-           + typeToJson(e.parameters[i]->type) + "}";
+           + typeToJson(e.parameters[i]->type) 
+           + ", spesifiers: "+specifiersToJson(e.parameters[i]->specifiers)
+           + "}";
     }
     s += "]\n" + pad(lvl) + "}";
     return s;

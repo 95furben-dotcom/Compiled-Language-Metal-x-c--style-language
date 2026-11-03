@@ -6,11 +6,7 @@
 #include "../../ASTParser/AST.hpp"
 #include "../../ASTParser/Specifiers.hpp"
 #include "../Utillity/Caster.hpp"
-#include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Type.h"
-#include "llvm/IR/Value.h"
-
-#include "../CodeGenError.hpp"
 
 struct SymbolEntry{
     const Node *target;
