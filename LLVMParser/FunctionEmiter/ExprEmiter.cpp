@@ -1,5 +1,5 @@
 #include "FunctionEmiter.hpp"
-#include "../Utility/Oprands.hpp"
+#include "../Utillity/Oprands.hpp"
 #include <string>
 
 #include "../Utillity/Caster.hpp"
@@ -17,6 +17,7 @@ Vartype FunctionEmiter::emitExpr(const ExprNode* exprNode, uint resultStackPos){
     
     // NumberNode OprandNode VariableCallNode FuncCallNode StaticMemberNode StaticFuncCallNode InstanceFuncCallNode InstanceMemberNode     
     if(ExprHasDestination(exprNode)){
+        
         Dest src = FindExprDestination(exprNode);
         Vartype type = src.entry->vatiableInstance.type;
 
