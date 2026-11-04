@@ -2,8 +2,9 @@
 #include "../Symbolscanner/SymbolScanner.hpp"
 #include "llvm/IR/Value.h"
 #include "../../Vartype.hpp"
+#include "llvm/IR/DerivedTypes.h"
 
-static llvm::Type* getLLVMType(Vartype t, llvm::LLVMContext& ctx, const SymbolScanner& symbolScanner, const Path& scope)  {
+static llvm::Type * getLLVMType(Vartype t, llvm::LLVMContext& ctx, const SymbolScanner& symbolScanner, const Path& scope)  {
     if(t.IsPrimitive()){
         switch (t.primitivetype.value()) {
             case PrimitiveType::BOOL:   return llvm::Type::getInt1Ty(ctx);
