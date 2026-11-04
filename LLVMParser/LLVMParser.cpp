@@ -1,5 +1,5 @@
 #include "LLVMParser.hpp"
-#include "FunctionParser.hpp"
+#include "FunctionBuilder/FunctionBuilder.hpp"
 
 void LLVMParser::BuildNamespace(const NamespaceNode* namespaceNode, std::vector<std::string> path){
     for (const DeclNode *decl : namespaceNode->declarations) {

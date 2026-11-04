@@ -1,10 +1,8 @@
-#pragma once
 #include "../Symbolscanner/SymbolScanner.hpp"
-#include "llvm/IR/Value.h"
 #include "../../Vartype.hpp"
-#include "llvm/IR/DerivedTypes.h"
 
-static llvm::Type * getLLVMType(Vartype t, llvm::LLVMContext& ctx, const SymbolScanner& symbolScanner, const Path& scope)  {
+#include "FunctionBuilder.hpp"
+llvm::Type * LLVMParser::FunctionBuilder::GetLLVMType(Vartype t)  {
     if(t.IsPrimitive()){
         switch (t.primitivetype.value()) {
             case PrimitiveType::BOOL:   return llvm::Type::getInt1Ty(ctx);
@@ -23,6 +21,6 @@ static llvm::Type * getLLVMType(Vartype t, llvm::LLVMContext& ctx, const SymbolS
         }
     }
     if(t.structPath.has_value()){
-        return symbolScanner.FindStruct(t.structPath.value(), scope)->llvmType;
+        return symbolScanner.FindStruct(t.structPath.value(), path)->llvmType;
     }
 }
