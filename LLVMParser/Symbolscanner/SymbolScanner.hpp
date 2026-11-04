@@ -6,7 +6,7 @@
 #include "SymbolEntries.hpp"
 #include "../../ASTParser/AST.hpp"
 #include "../Utillity/Caster.hpp"
-#include "../CodeGenError.hpp"
+#include "../Utillity/LLVMDebug.hpp"
 struct SymbolScanner{
     std::vector<StructEntry> structEntries;
     std::vector<FunctionEntry> functionEntries;
