@@ -14,7 +14,7 @@ in this case, it gets the first argument as a refrance to space on stack
 struct FunctionEmiter{
     const Path& path;
     const SymbolScanner& symbolScanner;
-    LLVMParser& llvmparser;
+    LLVMBuilder& llvmparser;
 
     std::unordered_map<std::string, int> values;
 
@@ -27,7 +27,7 @@ struct FunctionEmiter{
 
     uint stackSpaceNeeded;
     
-    FunctionEmiter(const SymbolScanner& symbolScanner, const Path& path, const FunctionEntry* objectEntry, const FunctionNode* functionNode, LLVMParser& llvmparser ) 
+    FunctionEmiter(const SymbolScanner& symbolScanner, const Path& path, const FunctionEntry* objectEntry, const FunctionNode* functionNode, LLVMBuilder& llvmparser ) 
         : path(path), symbolScanner(symbolScanner), values(), llvmparser(llvmparser),
         returnType(functionNode->returnType),stackSpaceNeeded(calcStackSize(functionNode)),objectEntry(objectEntry), isStatic(objectEntry == nullptr){
             CALLSTACKADD();

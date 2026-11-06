@@ -41,7 +41,7 @@ namespace Tokenizer{
         std::string subject = getDefinition(fileconts, endIndex);
         if(Vartype::IsStringPrimitive(subject)){
             index = endIndex;
-            return std::make_unique<typeToken>(Vartype::NewPrimitive(stringToPrimitiveType(subject)));
+            return std::make_unique<typeToken>((stringToPrimitiveType(subject)));
         }
         if(subject == "string"){
             index = endIndex;

@@ -286,7 +286,7 @@ static void printMember(std::ostringstream& out, const MemberNode* node, std::ve
         }
     } else if (auto* n = dynamic_cast<const KernelDefinitionNode*>(node)) {
         out << "KernelDefinition \"" << n->name << "\" -> "
-            << vartypeToString(Vartype::NewPrimitive(PrimitiveType::VOID)) << "\n";
+            << vartypeToString((PrimitiveType::VOID)) << "\n";
         size_t bodyCount = n->body ? n->body->statements.size() : 0;
         size_t total = n->params.size() + bodyCount;
         size_t idx = 0;
@@ -350,7 +350,7 @@ static void printDecl(std::ostringstream& out, const DeclNode* node, std::vector
         }
     } else if (auto* n = dynamic_cast<const KernelDefinitionNode*>(node)) {
         out << "KernelDefinitionNode \"" << n->name << "\" -> "
-            << vartypeToString(Vartype::NewPrimitive(PrimitiveType::VOID)) << "\n";
+            << vartypeToString((PrimitiveType::VOID)) << "\n";
         size_t bodyCount = n->body ? n->body->statements.size() : 0;
         size_t total = n->params.size() + bodyCount;
         size_t idx = 0;

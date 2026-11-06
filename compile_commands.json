@@ -13,6 +13,36 @@
 },
 {
   "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/FunctionBuilder/FunctionBuilder.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionBuilder/FunctionBuilder.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionBuilder/FunctionBuilder.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/FunctionBuilder/FunctionBuilder.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/FunctionBuilder/StatementBuilder.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionBuilder/StatementBuilder.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/FunctionBuilder/StatementBuilder.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/FunctionBuilder/StatementBuilder.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/GetType.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/GetType.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/GetType.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/GetType.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/LLVMBuilder.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/LLVMBuilder.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/LLVMBuilder.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/LLVMBuilder.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/ValueBuilder.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/ValueBuilder.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/ValueBuilder.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/ValueBuilder.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
   "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/main.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/main.cpp",
   "file": "/Users/benjamin/Documents/c++/CompiledLanguage/main.cpp",
   "output": "CMakeFiles/my_program.dir/main.cpp.o"

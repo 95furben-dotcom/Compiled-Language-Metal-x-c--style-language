@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <optional>
 #include <set>
 #include <vector>
@@ -7,6 +8,9 @@
 #include "../../ASTParser/AST.hpp"
 #include "../Utillity/Caster.hpp"
 #include "../Utillity/LLVMDebug.hpp"
+#include "llvm/IR/GlobalVariable.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/Module.h"
 struct SymbolScanner{
     std::vector<StructEntry> structEntries;
     std::vector<FunctionEntry> functionEntries;
@@ -19,53 +23,53 @@ struct SymbolScanner{
         ComputeSizes();
     }
 
-    std::optional<StructEntry> FindStruct(const Path& dep, Path scope) const{
+    const StructEntry* FindStruct(const Path& dep, Path scope) const{
         while(true){
             Path candidate = scope;
             candidate.insert(candidate.end(), dep.begin(), dep.end());
 
             for(uint i = 0; i < structEntries.size(); i++){
                 if(structEntries[i].path == candidate)
-                    return structEntries[i];
+                    return &structEntries[i];
             }
 
             if(scope.empty())
                 break;
             scope.pop_back(); // fallback: widen search by dropping the innermost scope level
         }
-        return {};
+        return nullptr;
     }
 
-    std::optional<FunctionEntry> FindFunction(const Path& dep, Path scope) const{
+    const FunctionEntry*FindFunction(const Path& dep, Path scope) const{
         while(true){
             Path candidate = scope;
             candidate.insert(candidate.end(), dep.begin(), dep.end());
             for(uint i = 0; i < functionEntries.size(); i++){
                 if(functionEntries[i].path == candidate)
-                    return functionEntries[i];
+                    return &functionEntries[i];
             }
 
             if(scope.empty())
                 break;
             scope.pop_back(); // fallback: widen search by dropping the innermost scope level
         }
-        return {};
+        return nullptr;
     }
 
-    std::optional<VariableEntry> FindStaticVar(const Path& dep, Path scope) const{
+    const VariableEntry* FindStaticVar(const Path& dep, Path scope) const{
         while(true){
             Path candidate = scope;
             candidate.insert(candidate.end(), dep.begin(), dep.end());
             for(uint i = 0; i < staticVariableEntries.size(); i++){
                 if(staticVariableEntries[i].path == candidate)
-                    return staticVariableEntries[i];
+                    return &staticVariableEntries[i];
             }
 
             if(scope.empty())
                 break;
             scope.pop_back(); // fallback: widen search by dropping the innermost scope level
         }
-        return {};
+        return nullptr;
     }
 
 
@@ -76,8 +80,9 @@ struct SymbolScanner{
         else if(t.vectorType){
             return 24;
         }else{
-            StructEntry entry = FindStruct(t.structPath.value(), scope).value();
-            return entry.size;
+            const StructEntry* entry = FindStruct(t.structPath.value(), scope);
+            if(!entry) throw CodeGenError("Can not find  entry in GetVartypeSize: "+ join(scope,'.'));
+            return entry->size;
         }
     }
 
@@ -132,8 +137,6 @@ struct SymbolScanner{
         if(resolved.size() != structEntries.size())
             throw CodeGenError("Circular struct dependency detected");
     }
-
-
     private:
     void GenerateNamespaceSymbols(const NamespaceNode* program, Path path = {}){
         structEntries = std::vector<StructEntry>();

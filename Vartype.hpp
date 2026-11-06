@@ -26,16 +26,14 @@ struct Vartype{
     std::optional<Path> structPath;
     Vartype* vectorType; // 8 byte pointer to data 8 byte number for size 8 byte number for capasity 
 
-    bool IsPrimitive(){
+    bool IsPrimitive() const{
         return !structPath.has_value() && vectorType == nullptr;
     }
 
     Vartype(std::optional<PrimitiveType> primitivetype, std::optional<std::vector<std::string>> structPath, Vartype* vectorType)
         : primitivetype(primitivetype), structPath(structPath), vectorType(vectorType){}
 
-    static Vartype NewPrimitive(PrimitiveType t){
-        return Vartype(t,{}, nullptr);
-    }
+    Vartype(PrimitiveType t) : primitivetype(t),structPath({}),vectorType(nullptr){}
 
     static Vartype NewStructType(const std::vector<std::string>& structPath){
         return Vartype({},structPath, nullptr);
@@ -53,7 +51,7 @@ struct Vartype{
     
 };
 
-static const Vartype STRINGTYPE = Vartype::NewVectorType(new Vartype(Vartype::NewPrimitive(PrimitiveType::CHAR)));
+static const Vartype STRINGTYPE = Vartype::NewVectorType(new Vartype(PrimitiveType::CHAR));
 
 static std::string join(const std::vector<std::string>& v, std::string sep){
     std::ostringstream oss;
@@ -85,7 +83,24 @@ static std::string vartypeToString(Vartype t){
 }
 
 
-
+static bool isPrimitiveSigned(PrimitiveType t){
+    switch (t) {
+    case PrimitiveType::UCHAR:
+    case PrimitiveType::USHORT:
+    case PrimitiveType::ULONG:
+    case PrimitiveType::UINT:
+    case PrimitiveType::BOOL:
+    case PrimitiveType::VOID:
+        return false;
+    case PrimitiveType::CHAR:
+    case PrimitiveType::SHORT:
+    case PrimitiveType::INT:
+    case PrimitiveType::FLOAT:
+    case PrimitiveType::LONG:
+    case PrimitiveType::DOUBLE:
+        return true;
+    }
+}
 
 static uint PrimitiveSize(PrimitiveType v){
     switch (v) {

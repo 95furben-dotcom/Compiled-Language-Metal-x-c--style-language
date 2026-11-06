@@ -34,6 +34,8 @@ struct VariableEntry : SymbolEntry{
 
     VariableEntry(const VarDefNode* target, const Path& path)
     : SymbolEntry(target, path, target->name), type(target->type), specifiers(target->specifiers){}
+
+    const VarDefNode* GetTarget() const {return Cast<VarDefNode>(target);}
 };
 
 struct StructEntry : SymbolEntry{

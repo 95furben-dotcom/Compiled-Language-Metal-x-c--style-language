@@ -3,8 +3,8 @@
 #include "../../ASTParser/AST.hpp"
 template<typename B, typename A>
 static const B* Cast(const A* node){
-    static_cast<std::is_base_of<Node, A>>("A must be node");
-    static_cast<std::is_base_of<B, A>>("A bust be base of b");
+    static_assert(std::is_base_of_v<Node, A>,"A must be node");
+    static_assert(std::is_base_of_v<B, A> || std::is_base_of_v<A, B>,"A bust be base of b or the other way");
 
     return dynamic_cast<const B*>(node);
 }

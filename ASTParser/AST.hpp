@@ -27,7 +27,7 @@ struct MemberNode : virtual Node, virtual DeclNode {};     // things inside a st
 
 struct TypeNode : virtual Node, Vartype{
     TypeNode(const Vartype& t) : Vartype(t){}
-    TypeNode() : Vartype(Vartype::NewPrimitive(PrimitiveType::VOID)) {}
+    TypeNode() : Vartype(PrimitiveType::VOID) {}
 };
 
 struct BodyNode : Node{

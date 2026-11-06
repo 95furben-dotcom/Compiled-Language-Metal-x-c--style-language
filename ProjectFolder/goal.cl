@@ -1,3 +1,6 @@
+static int a = 2;
+static int b = 1 + a;
+
 static int main(){
     _gpu vector<int> a;
     _gpu vector<int> b;
