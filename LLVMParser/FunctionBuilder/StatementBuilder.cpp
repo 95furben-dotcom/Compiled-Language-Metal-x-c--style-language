@@ -64,23 +64,28 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
     }
     if(auto n = TryCast<VariableCallNode>(node)){
         if(locals.contains(n->name)){
-            auto v = locals[n->name];
+            auto v = locals.at(n->name);
             return {v.AllocaInst,v.type};
         }
         if(parent.globals.contains(n->name)){
-            auto v = parent.globals[n->name];
+            auto v = parent.globals.at(n->name);
 
             return {v.global,v.type};
         }
+    }
+
+    if(auto n = TryCast<StaticMemberNode>(node)){
+        if(parent.globals.contains(join(n->path, '.'))){
+            auto v = parent.globals.at(join(n->path, '.'));
+            return {v.global,v.type};
+        }
+        throw CodeGenError("No global at path "+ join(n->path, '.'));
     }
 
     throw CodeGenError("Can not get allocator for this type of node");
 
     if(auto n = TryCast<FuncCallNode>(node)){
         throw CodeGenError("GetAlloca ExprNode-variation FuncCallNode uncounted for");
-    }
-    if(auto n = TryCast<StaticMemberNode>(node)){
-        throw CodeGenError("GetAlloca ExprNode-variation StaticMemberNode uncounted for");
     }
     if(auto n = TryCast<InstanceMemberNode>(node)){
         throw CodeGenError("GetAlloca ExprNode-variation InstanceMemberNode uncounted for");
