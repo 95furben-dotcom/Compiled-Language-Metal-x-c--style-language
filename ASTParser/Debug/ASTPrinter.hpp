@@ -153,8 +153,11 @@ static void printStatement(std::ostringstream& out, const StatementNode* node, s
             out << "AssignNode \"" << n->op << "\"\n";
         else
             out << "AssignNode \"" << n->op << "=\"\n";
-        auto c = ls; c.push_back(false); printExpr(out, n->target, c);
-        c.back() = true;                 printExpr(out, n->value, c);
+        auto c = ls; 
+        c.push_back(false); 
+        printExpr(out, n->target, c);
+        c.back() = true;                 
+        printExpr(out, n->value, c);
 
     } else if (auto* n = dynamic_cast<const VarDefNode*>(node)) {
         out << modifierPrefix(n->specifiers)
