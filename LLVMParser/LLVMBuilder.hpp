@@ -12,9 +12,11 @@
 struct LLVMBuilder{
     struct TypedValue {
         llvm::Value* value;
-        Vartype type;       
+        Vartype type;      
+        TypedValue(llvm::Value* value,
+        Vartype type) : value(value), type(type){}
     };
-    
+
     struct GlobalVar {
         llvm::GlobalVariable* global;
         llvm::Type* llvmType;
@@ -36,14 +38,17 @@ struct LLVMBuilder{
     static void ASTToLLVM(const NamespaceNode* program){
         LLVMBuilder parser(program);
         parser.BuildStaticVariables();
+        parser.DeclareFunctions();
         parser.BuildNamespace(program);
     }
 
-    //
+    // LLVMBuilder
     void BuildNamespace(const NamespaceNode* namespaceNode, std::vector<std::string> path = {});
     void BuildStaticVariables();
     void BuildStruct(const StructNode* structNode, std::vector<std::string> path = {});
+    void DeclareFunctions();
 
+    GlobalVar* FindGloabal(const Path& targetPath);
     // GetType
     llvm::Type* GetLLVMType(const Vartype& t, const Path& path);
     llvm::Type* GetLLVMType(PrimitiveType t);

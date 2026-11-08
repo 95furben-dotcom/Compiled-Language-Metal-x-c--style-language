@@ -1,6 +1,7 @@
 #include "LLVMBuilder.hpp"
 #include "FunctionBuilder/FunctionBuilder.hpp"
 #include "Utillity/Caster.hpp"
+#include "Utillity/LLVMDebug.hpp"
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/Support/raw_ostream.h"
@@ -77,4 +78,31 @@ void LLVMBuilder::WriteToFile(const std::string& filepath) {
         throw CodeGenError("Could not open " + filepath + ": " + ec.message());
 
     mod.print(out, nullptr);
+}
+
+LLVMBuilder::GlobalVar* LLVMBuilder::FindGloabal(const Path& targetPath){
+    auto p = targetPath;
+
+    while(p.size()>=1){
+        std::string label = join(p,'.');
+        // printf("Searching for label: %s\n",label.c_str());
+        if(globals.contains(label))
+            return &globals.at(label);
+        p.pop_back();
+    }
+    return nullptr;
+}
+
+void LLVMBuilder::DeclareFunctions() {
+    for (const auto& f : symbolScanner.functionEntries) {
+        std::vector<llvm::Type*> paramTypes;
+        for (auto* p : f.parameters)
+            paramTypes.push_back(GetLLVMType(p->type, f.path));
+
+        llvm::Type* ret = GetLLVMType(f.returnType, f.path);
+        auto* fnType = llvm::FunctionType::get(ret, paramTypes, false);
+
+        llvm::Function::Create(fnType, llvm::Function::ExternalLinkage,
+                               join(f.path, '.'), mod);
+    }
 }
