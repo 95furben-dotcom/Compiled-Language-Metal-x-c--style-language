@@ -66,7 +66,7 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
         if(locals.contains(n->name)){
             auto v = locals[n->name];
             return {v.AllocaInst,v.type};
-        
+        }
         if(parent.globals.contains(n->name)){
             auto v = parent.globals[n->name];
 
