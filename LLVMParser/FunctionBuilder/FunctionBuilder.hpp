@@ -7,8 +7,10 @@
 struct LLVMBuilder::FunctionBuilder
 { 
     struct LocalVar{
-        Vartype type;
-        llvm::AllocaInst* AllocaInst;
+      LocalVar(Vartype type, llvm::AllocaInst *AllocaInst)
+          : type(std::move(type)), AllocaInst(AllocaInst) {}
+      Vartype type;
+      llvm::AllocaInst *AllocaInst;
     };
 
     const FunctionNode* functionNode;
@@ -35,6 +37,7 @@ struct LLVMBuilder::FunctionBuilder
     
     // StatementBuilder
     void BuildStatement(const StatementNode* statement);
+    TypedValue CreateFuncCall(const FuncCallNode* n);
 
     // ValueBuilder
     TypedValue BuildValue(const ExprNode* node);
