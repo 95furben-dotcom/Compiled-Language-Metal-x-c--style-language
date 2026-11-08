@@ -8,7 +8,7 @@ Result<uint> ASTParser::OprandBind(std::string oprand){
     if(oprand == "+" || oprand == "-"){
         return 2;
     }
-    if(oprand == "*" || oprand == "/"){
+    if(oprand == "*" || oprand == "/" || oprand == "%"){
         return 3;
     }
     if(oprand == "^"){
