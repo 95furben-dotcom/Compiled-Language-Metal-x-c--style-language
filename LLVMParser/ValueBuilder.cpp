@@ -1,5 +1,8 @@
 #include "LLVMBuilder.hpp"
 #include "../Vartype.hpp"
+#include "Utillity/Caster.hpp"
+#include "Utillity/LLVMDebug.hpp"
+#include <cstdio>
 
 static bool isFloat(const Vartype& t) {
     return t.primitivetype &&
@@ -96,7 +99,8 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildValue(const ExprNode* node, const Path
     }
     if (auto* n = TryCast<VariableCallNode>(node)) {
         // adjust to what FindStaticVar really returns
-        if (auto* v = symbolScanner.FindStaticVar(path, {n->name})) {
+        printf("Finding var %s in path: %s\n",n->name.c_str(), join(path,'.').c_str());
+        if (auto* v = symbolScanner.FindStaticVar({n->name}, path)) {
             GlobalVar& g = globals.at(join(v->path, '.'));
             return {builder.CreateLoad(g.llvmType, g.global), g.type};
         }

@@ -8,9 +8,7 @@
 #include "../../ASTParser/AST.hpp"
 #include "../Utillity/Caster.hpp"
 #include "../Utillity/LLVMDebug.hpp"
-#include "llvm/IR/GlobalVariable.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Module.h"
+
 struct SymbolScanner{
     std::vector<StructEntry> structEntries;
     std::vector<FunctionEntry> functionEntries;
@@ -157,10 +155,19 @@ struct SymbolScanner{
             if(auto a = TryCast<FunctionNode>(node)){
                 FunctionEntry e(a, path);
                 functionEntries.push_back(e);
+                path.push_back(a->name);
+                GenerateFunctionInfos(a, path);
+                path.pop_back();
             }
             if(auto a = TryCast<KernelDefinitionNode>(node)){
                 KernelEntry e(a, path);
                 kernelEntries.push_back(e);
+            }
+            if(auto v = TryCast<VarDefNode>(node)){
+                if((v->specifiers & Specifiers::STATIC) != 0){
+                    VariableEntry e(v,path);
+                    staticVariableEntries.push_back(e);
+                }
             }
         }
     }
@@ -177,10 +184,30 @@ struct SymbolScanner{
             if(auto a = TryCast<FunctionNode>(m)){
                 FunctionEntry e(a, path);
                 functionEntries.push_back(e);
+                path.push_back(a->name);
+                GenerateFunctionInfos(a, path);
+                path.pop_back();
             }
             if(auto a = TryCast<KernelDefinitionNode>(m)){
                 KernelEntry e(a, path);
                 kernelEntries.push_back(e);
+            }
+            if(auto v = TryCast<VarDefNode>(m)){
+                if((v->specifiers & Specifiers::STATIC) != 0){
+                    VariableEntry e(v,path);
+                    staticVariableEntries.push_back(e);
+                }
+            }
+            
+        }
+    }
+    void GenerateFunctionInfos(const FunctionNode* node, Path& path){
+        for(auto* s : node->body->statements){
+            if(auto v = TryCast<VarDefNode>(s)){
+                if((v->specifiers & Specifiers::STATIC) != 0){
+                    VariableEntry e(v,path);
+                    staticVariableEntries.push_back(e);
+                }
             }
         }
     }

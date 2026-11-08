@@ -14,6 +14,7 @@ struct LLVMBuilder{
         llvm::Value* value;
         Vartype type;       
     };
+    
     struct GlobalVar {
         llvm::GlobalVariable* global;
         llvm::Type* llvmType;

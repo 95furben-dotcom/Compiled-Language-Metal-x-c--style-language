@@ -25,12 +25,14 @@ int main(){
         printf("\tsaticVariableEntries: %zu\n",s.staticVariableEntries.size());
         printf("\tkernelEntries: %zu\n",s.kernelEntries.size());
         printf("}\n");
+        
         // EntryPrinter::printAll(s.functionEntries);
         // EntryPrinter::printAll(s.structEntries);
         // EntryPrinter::printAll(s.staticVariableEntries);
         EntryPrinter::printAll(s.kernelEntries);
         EntryPrinter::writeToFile(s, "ProjectFolder/.cache/SymbolEntries.txt");
         LLVMBuilder llvmbuilder(program);
+        llvmbuilder.BuildStaticVariables();
         llvmbuilder.BuildNamespace(program);
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
 

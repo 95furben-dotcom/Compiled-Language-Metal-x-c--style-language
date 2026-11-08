@@ -31,6 +31,7 @@ struct LLVMBuilder::FunctionBuilder
     // FunctionBuilder
     void BuildFunction();
     const LocalVar* GetLocalVar(std::string target);
+    TypedValue GetAlloca(const ExprNode* node);
     
     // StatementBuilder
     void BuildStatement(const StatementNode* statement);

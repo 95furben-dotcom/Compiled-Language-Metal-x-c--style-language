@@ -45,7 +45,7 @@ LLVMBuilder::TypedValue fb::BuildValue(const ExprNode* node){
         auto b = BuildValue(op->v2);
         return parent.BuildOprand(a, b, op->oprand, path);
     }
-    return parent.BuildValue(node,path);
+    return parent.BuildValue(node, path);
 }
 
 const fb::LocalVar* fb::GetLocalVar(std::string target) {

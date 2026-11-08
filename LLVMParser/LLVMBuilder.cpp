@@ -19,8 +19,10 @@ void LLVMBuilder::BuildNamespace(const NamespaceNode* namespaceNode, std::vector
             path.pop_back();
         }
         if(auto* n = TryCast<FunctionNode>(decl)){
+            path.push_back(n->name);
             FunctionBuilder f(n, path, *this);
             f.BuildFunction();
+            path.pop_back();
         }
     }
 }
@@ -40,7 +42,9 @@ void LLVMBuilder::BuildStaticVariables() {
             init, join(v.path, '.'));
 
         globals.insert_or_assign(join(v.path, '.'), GlobalVar{ gv, ty, v.type });
+        printf("Added Global %s",join(v.path, '.').c_str());
     }
+    printf("symbolScanner.staticVariableEntries: x%zu",symbolScanner.staticVariableEntries.size());
 }
 
 void LLVMBuilder::BuildStruct(const StructNode* structNode, std::vector<std::string> path){
@@ -51,8 +55,11 @@ void LLVMBuilder::BuildStruct(const StructNode* structNode, std::vector<std::str
             path.pop_back();
         }
         if(auto* n = TryCast<FunctionNode>(member)){
+            path.push_back(n->name);
             FunctionBuilder f(n, path, *this);
             f.BuildFunction();
+            path.pop_back();
+
         }
     }
 }
