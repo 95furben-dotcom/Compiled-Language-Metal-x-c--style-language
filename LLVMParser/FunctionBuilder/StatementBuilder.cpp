@@ -1,5 +1,9 @@
 #include "FunctionBuilder.hpp"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/Value.h"
+#include <vector>
 void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement){
     if(auto n =TryCast<VarDefNode>(statement)){
         if((n->specifiers & Specifiers::STATIC) != 0)
@@ -18,23 +22,28 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
         }
         parent.builder.CreateStore(init, alloca); 
         locals.insert_or_assign(n->name, LocalVar{n->type, alloca});
+        return;
     }
     if(auto n =TryCast<ReturnNode>(statement)){
         parent.builder.CreateRet(BuildValue(n->value).value);
+        return;
     }
     if(auto n =TryCast<AssignNode>(statement)){
         auto target = GetAlloca(n->target);
         auto value = BuildValue(n->value);
 
-        value = parent.CastTo(value, target.type, path);
-
+        
         if(n->op != '='){
-            value = BuildOprand(target, value, {n->op});
+            llvm::Type* ty = parent.GetLLVMType(target.type, path);
+            TypedValue current = { parent.builder.CreateLoad(ty, target.value), target.type };
+            value = BuildOprand(current, value, {n->op});
         }
+        value = parent.CastTo(value, target.type, path);
         parent.builder.CreateStore(value.value, target.value);
+        return;
     }
     if(auto n =TryCast<FuncCallNode>(statement)){
-
+        
     }
     if(auto n =TryCast<IfNode>(statement)){
 
@@ -67,19 +76,23 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
             auto v = locals.at(n->name);
             return {v.AllocaInst,v.type};
         }
-        if(parent.globals.contains(n->name)){
-            auto v = parent.globals.at(n->name);
+        auto varPath = path;
+        varPath.push_back(n->name);
+        GlobalVar *g = parent.FindGloabal(varPath);
+        if(g)
+            return {g->global,g->type};
 
-            return {v.global,v.type};
-        }
+        throw CodeGenError("No global or local with name: " + n->name);
+        
     }
 
     if(auto n = TryCast<StaticMemberNode>(node)){
-        if(parent.globals.contains(join(n->path, '.'))){
-            auto v = parent.globals.at(join(n->path, '.'));
-            return {v.global,v.type};
-        }
-        throw CodeGenError("No global at path "+ join(n->path, '.'));
+        auto varPath = n->path;
+        GlobalVar *g = parent.FindGloabal(varPath);
+        if(g)
+            return {g->global,g->type};
+
+        throw CodeGenError("No global or local with path: " + join(n->path,'.'));
     }
 
     throw CodeGenError("Can not get allocator for this type of node");
@@ -90,5 +103,27 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
     if(auto n = TryCast<InstanceMemberNode>(node)){
         throw CodeGenError("GetAlloca ExprNode-variation InstanceMemberNode uncounted for");
     }
+
+}
+
+
+LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncCallNode* n){
+    auto params = n->params->params;
+    std::vector<llvm::Value*> args;
+    auto e = parent.symbolScanner.FindFunction({n->funcname}, path);
+    if(!e) throw CodeGenError("Could not find function"+n->funcname);
+    if(params.size() != e->parameters.size()) throw CodeGenError("Mismach in number of function parameters");
+    llvm::Function* callee = parent.mod.getFunction(join(e->path,'.'));
+    if(!callee) throw CodeGenError("Could not find function target "+join(e->path,'.'));
+
+    for(int i = 0; i <params.size(); i++){
+        auto v = BuildValue(params[i]);
+
+        v = parent.CastTo(v, e->parameters[i]->type,path);
+        args.push_back(v.value);
+    }
+    llvm::Value *returnValue = parent.builder.CreateCall(callee, args);
+
+    return {returnValue, e->returnType};
 
 }
