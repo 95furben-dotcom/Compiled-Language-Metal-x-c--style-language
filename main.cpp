@@ -8,6 +8,8 @@
 
 #include "LLVMParser/Symbolscanner/SymbolScanner.hpp"
 #include "LLVMParser/Symbolscanner/SymbolPrinter.hpp"
+#include <iostream>
+#include <stdexcept>
 
 int main(){
      try {
@@ -17,7 +19,10 @@ int main(){
 
         NamespaceNode *program = ASTParser::TokensToProgram(tokens);
         ASTPrinter::writeToFile(program, "ProjectFolder/.cache/AST.txt");
-
+        if(ASTPrinter::CompileFailed(program)){
+            ASTPrinter::print(program);
+            throw std::runtime_error("AST Failded");
+        }
         SymbolScanner s(program);
         printf("\nSymbolScannerFound{\n");
         printf("\tfunctionEntries: %zu\n",s.functionEntries.size());
