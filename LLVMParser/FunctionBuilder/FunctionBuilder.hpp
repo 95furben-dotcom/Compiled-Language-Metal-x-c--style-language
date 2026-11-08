@@ -3,6 +3,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Value.h"
 #include <map>
+#include <string>
 
 struct LLVMBuilder::FunctionBuilder
 { 
@@ -23,9 +24,17 @@ struct LLVMBuilder::FunctionBuilder
     llvm::Function *fn;
     llvm::BasicBlock *entry;
 
-    std::map<std::string, LocalVar> locals;
+    std::vector<std::map<std::string, LocalVar>> scopes;
+    void PushScope() {scopes.emplace_back();}
+    void PopScope() {scopes.pop_back();}
+    bool HasLocal(std::string key);
+
+    void SetLocal(std::string key, LocalVar var) {scopes.back().insert_or_assign(key, var);}
+
     FunctionBuilder(const FunctionNode* function, const Path& path, LLVMBuilder& parser)
-        : functionNode(function), path(path), parent(parser){}
+        : functionNode(function), path(path), parent(parser), scopes(){
+        PushScope();
+    }
 
     llvm::Type* GetLLVMType(Vartype t){return parent.GetLLVMType(t,path);}
     llvm::Type* GetLLVMType(PrimitiveType t) {return parent.GetLLVMType(t);}

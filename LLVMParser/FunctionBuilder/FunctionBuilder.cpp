@@ -7,6 +7,15 @@
 #include <cstddef>
 #include "FunctionBuilder.hpp"
 using fb = LLVMBuilder::FunctionBuilder;
+
+bool fb::HasLocal(std::string key){
+    for (auto& s : scopes){
+        if(s.contains(key))
+        return true;
+    }
+    return false;
+}
+
 void fb::BuildFunction(){
     std::vector<llvm::Type*> paramTypes = {};
     for(auto p : functionNode->params){
@@ -31,7 +40,7 @@ void fb::BuildFunction(){
         LocalVar l(p->type,parent.builder.CreateAlloca(t,nullptr, p->name));
         llvm::Argument* arg = fn->getArg(i);
         parent.builder.CreateStore(arg, l.AllocaInst);
-        locals.insert_or_assign(p->name, l);
+        SetLocal(p->name, l);
     }
  
     for(auto statement : functionNode->body->statements){
@@ -59,6 +68,7 @@ LLVMBuilder::TypedValue fb::BuildValue(const ExprNode* node){
 }
 
 const fb::LocalVar* fb::GetLocalVar(std::string target) {
+    for (const std::map<std::string, LocalVar>& locals : scopes)
     for (const auto& pair : locals) {
         if (pair.first == target) {
             return &pair.second; 

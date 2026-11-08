@@ -21,7 +21,7 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
             init = llvm::Constant::getNullValue(ty);            
         }
         parent.builder.CreateStore(init, alloca); 
-        locals.insert_or_assign(n->name, LocalVar{n->type, alloca});
+        SetLocal(n->name, LocalVar{n->type, alloca});
         return;
     }
     if(auto n =TryCast<ReturnNode>(statement)){
@@ -43,7 +43,7 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
         return;
     }
     if(auto n =TryCast<FuncCallNode>(statement)){
-        
+        CreateFuncCall(n);
     }
     if(auto n =TryCast<IfNode>(statement)){
 
@@ -72,9 +72,9 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
         throw CodeGenError("GetAlloca ExprNode-variation OprandNode uncounted for");
     }
     if(auto n = TryCast<VariableCallNode>(node)){
-        if(locals.contains(n->name)){
-            auto v = locals.at(n->name);
-            return {v.AllocaInst,v.type};
+        if(HasLocal(n->name)){
+          const LocalVar *v = GetLocalVar(n->name);
+          return {v->AllocaInst, v->type};
         }
         auto varPath = path;
         varPath.push_back(n->name);
