@@ -33,6 +33,7 @@ int main(){
         EntryPrinter::writeToFile(s, "ProjectFolder/.cache/SymbolEntries.txt");
         LLVMBuilder llvmbuilder(program);
         llvmbuilder.BuildStaticVariables();
+        llvmbuilder.DeclareFunctions();
         llvmbuilder.BuildNamespace(program);
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
 
