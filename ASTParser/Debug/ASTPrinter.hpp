@@ -390,4 +390,28 @@ static void writeToFile(DeclNode* root, const std::string& filepath) {
     file << toString(root);
 }
 
+static bool CompileFailed(const NamespaceNode* program) {
+    if (!program) return false;
+    if (program->isError()) return true;
+
+    for (const DeclNode* decl : program->declarations) {
+        if (decl->isError()) return true;
+
+        if (auto ns = dynamic_cast<const NamespaceNode*>(decl)) {
+            if (CompileFailed(ns)) return true;
+        }
+        else if (auto func = dynamic_cast<const FunctionNode*>(decl)) {
+            if (func->isError()) return true;
+            if (func->body) {
+                for (const StatementNode* stmt : func->body->statements) {
+                    if (stmt->isError()) return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }
+
+}
+

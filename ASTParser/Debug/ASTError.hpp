@@ -30,3 +30,4 @@ T* Ensure(Result<T*> node){
 
     return errorNode;
 }
+
