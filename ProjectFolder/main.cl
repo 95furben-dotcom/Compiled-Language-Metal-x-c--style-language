@@ -1,6 +1,7 @@
 static int main(){
-    static int a = 2;
-    a += 1;
-    int b = 3; 
+    return Add(1,2);
+}
+
+static int Add(int a, int b){
     return a + b;
 }
