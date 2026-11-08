@@ -75,6 +75,7 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildOprand(TypedValue a, TypedValue b,
     if (op == "+") return {fp ? builder.CreateFAdd(x, y, "sum")  : builder.CreateAdd(x, y, "sum"),  t};
     if (op == "-") return {fp ? builder.CreateFSub(x, y, "diff") : builder.CreateSub(x, y, "diff"), t};
     if (op == "*") return {fp ? builder.CreateFMul(x, y, "prod") : builder.CreateMul(x, y, "prod"), t};
+    if (op == "%") return {fp ? builder.CreateFRem(x, y,"rem")   : (sg ? builder.CreateSRem(x,y,"rem") : builder.CreateURem(x,y,"rem")),   t};
     if (op == "/") {
         if (fp) return {builder.CreateFDiv(x, y, "quot"), t};
         return {sg ? builder.CreateSDiv(x, y, "quot") : builder.CreateUDiv(x, y, "quot"), t};
