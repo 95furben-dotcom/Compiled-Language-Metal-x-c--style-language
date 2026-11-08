@@ -1,5 +1,6 @@
 #include "ASTParser.hpp"
-
+#include "../Tokenizer/TokenPrinter.hpp"
+#include "Debug/ASTError.hpp"
 Result<uint> ASTParser::OprandBind(std::string oprand){
     if(oprand == "==" || oprand == ">=" 
     || oprand == "<=" || oprand == "<" || oprand == ">"){
@@ -36,12 +37,15 @@ Result<ExprNode*> ASTParser::GetExprNode(uint bind){
             lhs = new OprandNode("[]",lhs, rhs);
             continue;
         }
-        
-        auto *op = TRY(getToken<operatorToken>());
+        std::cout << "GetExprNode: index=" << index
+     << ", token=" << TokenPrinter::printToken(*tokens[index].get()) << std::endl;
+        auto *op = tryGet<operatorToken>();
+        if(!op) return Fail("Expected operatorToken in GetExprNode",index);
         auto newBind = TRY(OprandBind(op->s));
 
         if(newBind <= bind)
             return lhs;
+        ADVANCE();
 
         ExprNode* rhs = TRY(GetExprNode(newBind));
 
