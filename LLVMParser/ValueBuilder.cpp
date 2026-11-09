@@ -76,6 +76,12 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildOprand(TypedValue a, TypedValue b,
     if (op == "-") return {fp ? builder.CreateFSub(x, y, "diff") : builder.CreateSub(x, y, "diff"), t};
     if (op == "*") return {fp ? builder.CreateFMul(x, y, "prod") : builder.CreateMul(x, y, "prod"), t};
     if (op == "%") return {fp ? builder.CreateFRem(x, y,"rem")   : (sg ? builder.CreateSRem(x,y,"rem") : builder.CreateURem(x,y,"rem")),   t};
+    if (op == "==") return {builder.CreateICmpEQ(x, y,"result"),   PrimitiveType::BOOL};
+    if (op == "!=") return {builder.CreateICmpNE(x, y,"result"),   PrimitiveType::BOOL};
+    if (op == ">=") return {sg ? builder.CreateICmpSGE(x, y,"result") :builder.CreateICmpUGE(x, y,"result") ,   PrimitiveType::BOOL};
+    if (op == "<=") return {sg ? builder.CreateICmpSLE(x, y,"result") :builder.CreateICmpULE(x, y,"result") ,   PrimitiveType::BOOL};
+    if (op == ">") return {sg ? builder.CreateICmpSGT(x, y,"result") :builder.CreateICmpUGT(x, y,"result") ,   PrimitiveType::BOOL};
+    if (op == "<") return {sg ? builder.CreateICmpSLT(x, y,"result") :builder.CreateICmpULT(x, y,"result") ,   PrimitiveType::BOOL};
     if (op == "/") {
         if (fp) return {builder.CreateFDiv(x, y, "quot"), t};
         return {sg ? builder.CreateSDiv(x, y, "quot") : builder.CreateUDiv(x, y, "quot"), t};

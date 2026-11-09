@@ -13,7 +13,7 @@
 
 int main(){
      try {
-        std::string fileconts = ReadFile("ProjectFolder/goal-current.cl");
+        std::string fileconts = ReadFile("ProjectFolder/main.cl");
         auto tokens = Tokenizer::tokenize(fileconts, 0);
         TokenPrinter::tokensToFile(tokens, "ProjectFolder/.cache/tokens.txt");
 

@@ -1,4 +1,5 @@
 #include "FunctionBuilder.hpp"
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -46,7 +47,34 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
         CreateFuncCall(n);
     }
     if(auto n =TryCast<IfNode>(statement)){
+        PushScope();
+        
+    
+        // true
+        llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(parent.ctx, "iftrue", fn);
+        llvm::BasicBlock *elseBB = n->elseBody ? llvm::BasicBlock::Create(parent.ctx, "iffalse", fn) : nullptr;
+        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(parent.ctx, "mergeBB", fn);
+        
+        TypedValue condition = BuildValue(n->condition);
+        if(!condition.type.IsPrimitive() || condition.type.primitivetype.value() != PrimitiveType::BOOL)
+            throw CodeGenError("Condition is not type bool");
+        parent.builder.CreateCondBr(condition.value, thenBB, elseBB ? elseBB : mergeBB);
+        
+        parent.builder.SetInsertPoint(thenBB);
+        for(auto statement : n->body->statements){
+            BuildStatement(statement);
+        }
+        if (!parent.builder.GetInsertBlock()->getTerminator()) parent.builder.CreateBr(mergeBB);
 
+        if (elseBB) {
+            parent.builder.SetInsertPoint(elseBB);  
+            for(auto statement : n->elseBody->statements){
+                BuildStatement(statement);
+            }
+            if (!parent.builder.GetInsertBlock()->getTerminator()) parent.builder.CreateBr(mergeBB);
+        }
+        parent.builder.SetInsertPoint(mergeBB);
+    return;
     }
     if(auto n =TryCast<WhileNode>(statement)){
 
@@ -62,7 +90,6 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
     }
     throw CodeGenError("StatementNode variation Not implimented");
 }
-
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* node){
     if(auto n = TryCast<OprandNode>(node)){
