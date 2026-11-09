@@ -145,7 +145,6 @@ Result<ExprNode*> ASTParser::FindNextExprNode(){
         auto t = TRY(getToken<valueToken>());
         NumberNode* n = new NumberNode("-"+t->s, PrimitiveType::INT);
 
-        ADVANCE(); // consume value
         return n;
     }
     if (auto t = tryGet<valueToken>()){
