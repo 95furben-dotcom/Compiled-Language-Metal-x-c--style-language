@@ -13,7 +13,7 @@
 
 int main(){
      try {
-        std::string fileconts = ReadFile("ProjectFolder/main.cl");
+        std::string fileconts = ReadFile("ProjectFolder/goal-current.cl");
         auto tokens = Tokenizer::tokenize(fileconts, 0);
         TokenPrinter::tokensToFile(tokens, "ProjectFolder/.cache/tokens.txt");
 
@@ -40,6 +40,7 @@ int main(){
         llvmbuilder.BuildStaticVariables();
         llvmbuilder.DeclareFunctions();
         llvmbuilder.BuildNamespace(program);
+        llvmbuilder.mod.print(llvm::errs(), nullptr);
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
 
         if(std::system("clang ProjectFolder/.cache/LLVMOutput.ll -o program") == 0)
