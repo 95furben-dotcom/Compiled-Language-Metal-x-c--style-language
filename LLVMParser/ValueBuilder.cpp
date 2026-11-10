@@ -2,6 +2,8 @@
 #include "../Vartype.hpp"
 #include "Utillity/Caster.hpp"
 #include "Utillity/LLVMDebug.hpp"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Value.h"
 #include <cstdio>
 
 static bool isFloat(const Vartype& t) {
@@ -94,6 +96,13 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildOprand(TypedValue a, TypedValue b,
 LLVMBuilder::TypedValue LLVMBuilder::BuildValue(const ExprNode* node, const Path& path) {
     if (auto* n = TryCast<NumberNode>(node)) {
         llvm::Type* ty = GetLLVMType(n->type, path);
+        if(n->type == PrimitiveType::BOOL){
+            if(n->value=="true")
+                return {llvm::ConstantInt::getBool(ty, true),n->type};
+            else 
+                return {llvm::ConstantInt::getBool(ty, false),n->type};
+        }
+        printf("Parsing value %s\n",n->value.c_str());
         llvm::Constant* c = ty->isFloatingPointTy()
             ? llvm::ConstantFP::get(ty, std::stod(n->value))
             : llvm::ConstantInt::get(ty, std::stoll(n->value), isSigned(n->type));
