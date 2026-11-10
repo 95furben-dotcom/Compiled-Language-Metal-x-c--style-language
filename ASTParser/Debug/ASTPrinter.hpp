@@ -64,7 +64,7 @@ static void printExpr(std::ostringstream& out, const ExprNode* node, std::vector
     if (printIfError(out, node)) return;
 
     if (auto* n = dynamic_cast<const NumberNode*>(node)) {
-        out << "NumberNode [" << n->value << "]\n";
+        out << "NumberNode [" << n->value << ": "<<vartypeToString(n->type)<<"]\n";
 
     } else if (auto* n = dynamic_cast<const StringNode*>(node)) {
         out << "StringNode \"" << n->value << "\"\n";
