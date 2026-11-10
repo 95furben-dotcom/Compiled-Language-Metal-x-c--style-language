@@ -26,7 +26,12 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
         return;
     }
     if(auto n =TryCast<ReturnNode>(statement)){
-        parent.builder.CreateRet(BuildValue(n->value).value);
+        TypedValue v = BuildValue(n->value);
+        if(v.type.primitivetype != functionNode->returnType.primitivetype
+        || v.type.vectorType != functionNode->returnType.vectorType
+        || v.type.structPath != functionNode->returnType.structPath)
+            throw CodeGenError("Returning wrong type: "+vartypeToString(v.type)+", should be "+vartypeToString(functionNode->returnType));
+        parent.builder.CreateRet(v.value);
         return;
     }
     if(auto n =TryCast<AssignNode>(statement)){
@@ -45,50 +50,94 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
     }
     if(auto n =TryCast<FuncCallNode>(statement)){
         CreateFuncCall(n);
+        return;
     }
     if(auto n =TryCast<IfNode>(statement)){
         PushScope();
-        
-    
         // true
-        llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(parent.ctx, "iftrue", fn);
-        llvm::BasicBlock *elseBB = n->elseBody ? llvm::BasicBlock::Create(parent.ctx, "iffalse", fn) : nullptr;
-        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(parent.ctx, "mergeBB", fn);
-        
+        llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(parent.ctx, "if.then", fn);
+        llvm::BasicBlock *elseBB = n->elseBody ? llvm::BasicBlock::Create(parent.ctx, "if.else", fn) : nullptr;
+        llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(parent.ctx, "if.merge", fn);
+        mergeBBs.push_back(mergeBB);
         TypedValue condition = BuildValue(n->condition);
-        if(!condition.type.IsPrimitive() || condition.type.primitivetype.value() != PrimitiveType::BOOL)
-            throw CodeGenError("Condition is not type bool");
+            if(!condition.type.IsPrimitive() || condition.type.primitivetype.value() != PrimitiveType::BOOL)
+                throw CodeGenError("Condition is not type bool");
+
         parent.builder.CreateCondBr(condition.value, thenBB, elseBB ? elseBB : mergeBB);
-        
         parent.builder.SetInsertPoint(thenBB);
         for(auto statement : n->body->statements){
             BuildStatement(statement);
         }
-        if (!parent.builder.GetInsertBlock()->getTerminator()) parent.builder.CreateBr(mergeBB);
+        if (!parent.builder.GetInsertBlock()->hasTerminator()) 
+            parent.builder.CreateBr(mergeBB);
 
         if (elseBB) {
             parent.builder.SetInsertPoint(elseBB);  
             for(auto statement : n->elseBody->statements){
                 BuildStatement(statement);
             }
-            if (!parent.builder.GetInsertBlock()->getTerminator()) parent.builder.CreateBr(mergeBB);
+            if (!parent.builder.GetInsertBlock()->hasTerminator()) parent.builder.CreateBr(mergeBB);
         }
         parent.builder.SetInsertPoint(mergeBB);
-    return;
+        mergeBBs.pop_back();
+        PopScope();
+        return;
     }
     if(auto n =TryCast<WhileNode>(statement)){
-
+        PushScope();
+        BuildLoop(n,nullptr);
+        PopScope();
+        return;
     }
     if(auto n =TryCast<ForNode>(statement)){
-
+        PushScope();
+        BuildStatement(n->iteratordef);
+        BuildLoop(n->loop, n->assignement);
+        PopScope();
+        return;
     }
     if(auto n =TryCast<ContinueNode>(statement)){
-
+        if(thenBBs.empty())
+            throw CodeGenError("Can not skip to next iteration: thenBB is null");
+        parent.builder.CreateBr(thenBBs.back());
+        return;
     }
     if(auto n =TryCast<BreakNode>(statement)){
-
+         if(mergeBBs.empty())
+            throw CodeGenError("Can not skip to next iteration: thenBB is null");
+        parent.builder.CreateBr(mergeBBs.back());
+        return;
     }
     throw CodeGenError("StatementNode variation Not implimented");
+}
+
+void LLVMBuilder::FunctionBuilder::BuildLoop(const WhileNode* node, const AssignNode* iterator){
+    llvm::BasicBlock *condBB  = llvm::BasicBlock::Create(parent.ctx, "while.cond", fn);
+    llvm::BasicBlock *bodyBB  = llvm::BasicBlock::Create(parent.ctx, "while.body", fn);
+    llvm::BasicBlock *endBB = llvm::BasicBlock::Create(parent.ctx, "while.end", fn);
+
+    thenBBs.push_back(bodyBB);
+    mergeBBs.push_back(endBB);
+    parent.builder.CreateBr(condBB);
+    parent.builder.SetInsertPoint(condBB);
+    TypedValue condition = BuildValue(node->condition);
+    if(!condition.type.IsPrimitive() || condition.type.primitivetype.value() != PrimitiveType::BOOL)
+        throw CodeGenError("Condition is not type bool");
+
+    parent.builder.CreateCondBr(condition.value, bodyBB,  endBB);
+    parent.builder.SetInsertPoint(bodyBB);
+
+    for(auto statement : node->body->statements){
+        BuildStatement(statement);
+    }
+    if(iterator)
+        BuildStatement(iterator);
+    if (!parent.builder.GetInsertBlock()->hasTerminator())
+        parent.builder.CreateBr(condBB);
+
+    parent.builder.SetInsertPoint(endBB);
+    thenBBs.pop_back();
+    mergeBBs.pop_back();
 }
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* node){
@@ -132,6 +181,8 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
     }
 
 }
+
+
 
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncCallNode* n){

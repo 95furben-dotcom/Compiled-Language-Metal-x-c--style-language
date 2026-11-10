@@ -1,9 +1,11 @@
 #include "../LLVMBuilder.hpp"
 #include "../Utillity/LLVMDebug.hpp"
+#include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Value.h"
 #include <map>
 #include <string>
+#include <vector>
 
 struct LLVMBuilder::FunctionBuilder
 { 
@@ -25,6 +27,10 @@ struct LLVMBuilder::FunctionBuilder
     llvm::BasicBlock *entry;
 
     std::vector<std::map<std::string, LocalVar>> scopes;
+
+    std::vector<llvm::BasicBlock*> thenBBs;
+    std::vector<llvm::BasicBlock*> mergeBBs;
+
     void PushScope() {scopes.emplace_back();}
     void PopScope() {scopes.pop_back();}
     bool HasLocal(std::string key);
@@ -47,6 +53,9 @@ struct LLVMBuilder::FunctionBuilder
     // StatementBuilder
     void BuildStatement(const StatementNode* statement);
     TypedValue CreateFuncCall(const FuncCallNode* n);
+    
+    //DO PUSHSCOPE BEFORE RUNNING
+    void BuildLoop(const WhileNode* node, const AssignNode* iterator);
 
     // ValueBuilder
     TypedValue BuildValue(const ExprNode* node);
