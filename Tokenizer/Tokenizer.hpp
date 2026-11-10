@@ -118,7 +118,14 @@ namespace Tokenizer{
             while(isdigit(fileconts[index]) || fileconts[index] == '.' || isalpha(fileconts[index])){
                 index++;
             } 
-            return make_unique<valueToken>(fileconts.substr(startIndex, index-startIndex));
+            std::string s =fileconts.substr(startIndex, index-startIndex);
+            if(s.contains('.'))
+                return make_unique<valueToken>(s,PrimitiveType::FLOAT);
+            if(s.contains('-'))
+                return make_unique<valueToken>(s,PrimitiveType::INT);
+            return make_unique<valueToken>(s,PrimitiveType::UINT);
+            
+                
         }
 
         if(isAlphaChar(c)){
@@ -142,10 +149,10 @@ namespace Tokenizer{
                 return std::make_unique<namespaceToken>();
             }
             if(subject == "true"){
-                return make_unique<valueToken>(subject);
+                return make_unique<valueToken>(subject, PrimitiveType::BOOL);
             }
             if(subject == "false"){
-                return make_unique<valueToken>(subject);
+                return make_unique<valueToken>(subject, PrimitiveType::BOOL);
             }
             if(subject == "if"){
                 return std::make_unique<ifToken>();

@@ -142,13 +142,13 @@ Result<ExprNode*> ASTParser::FindNextExprNode(){
         if(op->s != "-")
             return Fail("Expected '-' for exprnode",index);
 
-        auto t = TRY(getToken<valueToken>());
-        NumberNode* n = new NumberNode("-"+t->s, PrimitiveType::INT);
+        const valueToken *t = TRY(getToken<valueToken>());
+        NumberNode* n = new NumberNode("-"+t->s, t->type);
 
         return n;
     }
     if (auto t = tryGet<valueToken>()){
-        NumberNode* n = new NumberNode(t->s, PrimitiveType::INT);
+        NumberNode* n = new NumberNode(t->s, t->type);
         
         ADVANCE(); // consume value
         return n;

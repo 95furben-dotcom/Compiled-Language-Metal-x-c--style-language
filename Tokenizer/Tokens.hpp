@@ -32,8 +32,9 @@ struct stringToken : virtual Token{
 struct endlToken : virtual Token{};
 struct returnToken : virtual Token{};
 struct valueToken : virtual Token{
-    valueToken(std::string s) : s(s){}
+    valueToken(std::string s, PrimitiveType type) : s(s), type(type){}
     std::string s;
+    PrimitiveType type;
 };
 struct definisionToken : virtual Token{
     definisionToken(std::string name) : name(name){}
