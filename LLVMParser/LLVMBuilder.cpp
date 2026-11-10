@@ -45,7 +45,6 @@ void LLVMBuilder::BuildStaticVariables() {
         globals.insert_or_assign(join(v.path, '.'), GlobalVar{ gv, ty, v.type });
         printf("Added Global %s",join(v.path, '.').c_str());
     }
-    printf("symbolScanner.staticVariableEntries: x%zu",symbolScanner.staticVariableEntries.size());
 }
 
 void LLVMBuilder::BuildStruct(const StructNode* structNode, std::vector<std::string> path){
