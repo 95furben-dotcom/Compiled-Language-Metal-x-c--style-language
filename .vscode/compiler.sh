@@ -9,7 +9,7 @@ mkdir -p .cache
 rm -rf build 
 
 # move compile commands
-cp .cache/build/compile_commands.json compile_commands.json
+
 
 
 # Compile app
@@ -23,6 +23,7 @@ cmake -B .cache/build \
 # Compile the project 
 cmake --build .cache/build
 
+cp .cache/build/compile_commands.json compile_commands.json
 
 
 # Run
