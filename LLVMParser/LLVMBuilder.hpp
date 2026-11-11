@@ -29,11 +29,17 @@ struct LLVMBuilder{
 
     SymbolScanner symbolScanner;
 
+    static llvm::Function* mallocFn;
+    static llvm::Function* freeFn;
+    static llvm::Function* printfFn;
+
+    std::map<std::string, llvm::StructType*> structTypes;
+   
     
-    std::map<std::string, GlobalVar> globals;   // key: join(path, '.')
+    std::map<std::string, GlobalVar> globals;  
 
     LLVMBuilder(const NamespaceNode* program)
-        : symbolScanner(program) {}
+        : symbolScanner(program) {DeclareLibcFunctions();}
 
     static void ASTToLLVM(const NamespaceNode* program){
         LLVMBuilder parser(program);
@@ -48,10 +54,16 @@ struct LLVMBuilder{
     void BuildStruct(const StructNode* structNode, std::vector<std::string> path = {});
     void DeclareFunctions();
 
+    void DeclareStructTypes();
+    void DeclareLibcFunctions();
     GlobalVar* FindGloabal(const Path& targetPath);
+    
     // GetType
     llvm::Type* GetLLVMType(const Vartype& t, const Path& path);
     llvm::Type* GetLLVMType(PrimitiveType t);
+    llvm::Type* GetStructType(const Path& structPath, const Path& scope);
+    llvm::StructType* GetVectorType(const Vartype& t, const Path& path);
+    
 
     // ValueBuilder
     TypedValue BuildValue(const ExprNode* node, const Path& path);
@@ -59,7 +71,9 @@ struct LLVMBuilder{
     TypedValue CastTo(TypedValue v, const Vartype& target, const Path& path);
     llvm::Constant* BuildConstant(const ExprNode* node, const Vartype& target, const Path& path);
     bool isSigned(const Vartype& a);
+    TypedValue GetStructField(TypedValue s, int fieldIdx, Path path);
 
+    
     
     struct FunctionBuilder;
 

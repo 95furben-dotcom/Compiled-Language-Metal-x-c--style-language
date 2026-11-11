@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <stdexcept>
@@ -6,7 +7,7 @@
 #include <sys/types.h>
 #include <vector>
 #include <sstream>
-
+#include <memory>
 using Path = std::vector<std::string>;
 enum class PrimitiveType : uint8_t { UCHAR, CHAR, BOOL, SHORT, USHORT, INT, UINT, FLOAT, LONG, ULONG, DOUBLE, VOID};
 static const std::vector<std::string> primitives = { "uchar","char", "bool", "short", "ushort", "int", "uint", "float", "long", "ulong", "double", "void"};
@@ -26,12 +27,15 @@ struct Vartype{
     std::optional<Path> structPath;
     Vartype* vectorType; // 8 byte pointer to data 8 byte number for size 8 byte number for capasity 
 
+    std::shared_ptr<Vartype> pointee;     // non-null => this is a pointer to *pointee
+    bool IsPointer() const { return pointee != nullptr; }
+
     bool IsPrimitive() const{
-        return !structPath.has_value() && vectorType == nullptr;
+        return primitivetype.has_value();
     }
 
-    Vartype(std::optional<PrimitiveType> primitivetype, std::optional<std::vector<std::string>> structPath, Vartype* vectorType)
-        : primitivetype(primitivetype), structPath(structPath), vectorType(vectorType){}
+    Vartype(std::optional<PrimitiveType> primitivetype, std::optional<std::vector<std::string>> structPath, Vartype* vectorType,std::shared_ptr<Vartype> pointee = nullptr)
+        : primitivetype(primitivetype), structPath(structPath), vectorType(vectorType), pointee(pointee){}
 
     Vartype(PrimitiveType t) : primitivetype(t),structPath({}),vectorType(nullptr){}
 
@@ -48,7 +52,13 @@ struct Vartype{
         return std::find(primitives.begin(), primitives.end(), s) != primitives.end();
     }
 
+    static Vartype NewPtr(Vartype ptrTy){
+        return Vartype({},{}, nullptr, std::make_shared<Vartype>(ptrTy));
+    }
     
+    bool IsString(){
+        return (vectorType && vectorType->IsPrimitive() && vectorType->primitivetype.value() == PrimitiveType::CHAR);
+    }
 };
 
 static const Vartype STRINGTYPE = Vartype::NewVectorType(new Vartype(PrimitiveType::CHAR));
@@ -76,9 +86,11 @@ static std::string vartypeToString(Vartype t){
         return primitives[(uint)t.primitivetype.value()];
     if(t.structPath.has_value()) 
         return join(t.structPath.value(), ".");
-    if(t.vectorType == nullptr) 
-        throw std::runtime_error("Invalid Vartype: no value");
-    return "vector<"+vartypeToString(*t.vectorType)+">";
+    if(t.vectorType) 
+        return "vector<"+vartypeToString(*t.vectorType)+">";
+    if(t.pointee)
+        return "ptr<" + vartypeToString(*t.pointee);
+    throw std::runtime_error("Invalid Vartype: no value");
     
 }
 

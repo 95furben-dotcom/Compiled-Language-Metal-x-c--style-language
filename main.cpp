@@ -12,8 +12,8 @@
 #include <stdexcept>
 
 int main(){
-     try {
-        std::string fileconts = ReadFile("ProjectFolder/goal-current.cl");
+    //  try {
+        std::string fileconts = ReadFile("ProjectFolder/printf-example.cl");
         auto tokens = Tokenizer::tokenize(fileconts, 0);
         TokenPrinter::tokensToFile(tokens, "ProjectFolder/.cache/tokens.txt");
 
@@ -44,10 +44,10 @@ int main(){
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
 
         if(std::system("clang ProjectFolder/.cache/LLVMOutput.ll -o program") == 0)
-            std::system("./program; echo $?");
+            std::system("./program; echo Return Value: $?");
 
-    } catch (const std::exception& e) {
-        std::cerr << "error: " << e.what() << "\n";
-        return 1;
-    }
+    // } catch (const std::exception& e) {
+    //     std::cerr << "error: " << e.what() << "\n";
+    //     return 1;
+    // }
 }

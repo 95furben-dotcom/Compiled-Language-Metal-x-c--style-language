@@ -2,9 +2,17 @@
 #include "../Vartype.hpp"
 #include "Utillity/Caster.hpp"
 #include "Utillity/LLVMDebug.hpp"
+#include "llvm/ADT/APInt.h"
+#include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
+#include <cstdint>
 #include <cstdio>
+#include <sys/types.h>
+
+constexpr uint64_t STR_CONST_FLAG = 1ull << 63;
+// real capacity = cap & ~STR_CONST_FLAG;  isConst = cap & STR_CONST_FLAG
 
 static bool isFloat(const Vartype& t) {
     return t.primitivetype &&
@@ -122,6 +130,24 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildValue(const ExprNode* node, const Path
         }
         throw CodeGenError("Unknown variable: " + n->name);   // locals come later
     }
+    if(auto n = TryCast<StringNode>(node)){
+        llvm::Value *v = builder.CreateGlobalString(n->value);
+        llvm::Value *size = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), n->value.size());
+        llvm::Value *capasity = llvm::ConstantInt::get(llvm::Type::getInt64Ty(ctx), STR_CONST_FLAG | (uint64_t)n->value.size());
+        
+        llvm::Type* ty =GetLLVMType(STRINGTYPE, path);
+        llvm::AllocaInst *alloca = builder.CreateAlloca(ty, nullptr, "stringAlloca");
+        TypedValue self{alloca, STRINGTYPE};
+        TypedValue f0 = GetStructField(self, 0, path);
+        TypedValue f1 = GetStructField(self, 1, path);
+        TypedValue f2 = GetStructField(self, 2, path);
+        builder.CreateStore(v,        f0.value);
+        builder.CreateStore(size,     f1.value);
+        builder.CreateStore(capasity, f2.value);
+
+        
+        return {builder.CreateLoad(ty, alloca), STRINGTYPE};
+    }
     throw CodeGenError("BuildValue: expression type not implemented yet");
 }
 
@@ -133,4 +159,39 @@ llvm::Constant* LLVMBuilder::BuildConstant(const ExprNode* node, const Vartype& 
     auto* c = llvm::dyn_cast<llvm::Constant>(v.value);
     if (!c) throw CodeGenError("static initializer must be a compile-time constant");
     return c;
+}
+
+LLVMBuilder::TypedValue LLVMBuilder::GetStructField(TypedValue s, int fieldIdx, Path path){
+    if(s.type.vectorType){
+        llvm::Value* fieldPtr = builder.CreateInBoundsGEP(
+            GetLLVMType(s.type,path), 
+            s.value,
+            {builder.getInt32(0),builder.getInt32(fieldIdx)}
+        );
+
+        switch (fieldIdx) {
+            case 0:
+                return {fieldPtr, Vartype::NewPtr(PrimitiveType::CHAR)};
+            case 1:
+            case 2:
+                return {fieldPtr, PrimitiveType::ULONG};
+            default: throw CodeGenError("fieldIdx to big for vector");
+        }
+
+    }
+    if(!s.type.structPath)  throw CodeGenError("Can not get struct field on nonstruct");
+
+    auto e = symbolScanner.FindStruct(s.type.structPath.value(), path);
+    if(!e) throw CodeGenError("Could not get symbol for struct: "+join(s.type.structPath.value(),'.'));
+    if(e->fields.size() <= fieldIdx) throw CodeGenError("struct fiedl size smaller than field index");
+
+    Vartype vt = e->fields[fieldIdx].type;
+    llvm::Type* ty = GetLLVMType(vt, path);
+
+    llvm::Value* fieldPtr = builder.CreateInBoundsGEP(
+        GetLLVMType(s.type,path), 
+        s.value,
+        {builder.getInt32(0),builder.getInt32(fieldIdx)}
+    );
+    return {fieldPtr, vt};
 }

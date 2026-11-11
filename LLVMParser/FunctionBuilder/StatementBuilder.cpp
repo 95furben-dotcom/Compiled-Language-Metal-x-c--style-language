@@ -27,10 +27,7 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
     }
     if(auto n =TryCast<ReturnNode>(statement)){
         TypedValue v = BuildValue(n->value);
-        if(v.type.primitivetype != functionNode->returnType.primitivetype
-        || v.type.vectorType != functionNode->returnType.vectorType
-        || v.type.structPath != functionNode->returnType.structPath)
-            throw CodeGenError("Returning wrong type: "+vartypeToString(v.type)+", should be "+vartypeToString(functionNode->returnType));
+        v = parent.CastTo(v, functionNode->returnType, path);
         parent.builder.CreateRet(v.value);
         return;
     }
@@ -183,13 +180,23 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
 }
 
 
-
+LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::EmitPrintf(const FuncCallNode* n){
+    if(n->params->params.size() != 1)
+        throw CodeGenError("Printf takes 1 statment, got "+std::to_string(n->params->params.size()));
+    auto alloca = GetAlloca(n->params->params[0]);
+    if(!alloca.type.IsString()) throw CodeGenError("Can not print non string");
+    auto str_ptr = parent.GetStructField(alloca, 0, path);
+    llvm::Value* str_c = parent.builder.CreateLoad(GetLLVMType(str_ptr.type),  str_ptr.value);
+    llvm::Value *returnValue = parent.builder.CreateCall(printfFn, {str_c});
+    return {returnValue,PrimitiveType::INT};
+}
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncCallNode* n){
+    if(n->funcname == "print") return EmitPrintf(n);
     auto params = n->params->params;
     std::vector<llvm::Value*> args;
     auto e = parent.symbolScanner.FindFunction({n->funcname}, path);
-    if(!e) throw CodeGenError("Could not find function"+n->funcname);
+    if(!e) throw CodeGenError("Could not find function: "+n->funcname);
     if(params.size() != e->parameters.size()) throw CodeGenError("Mismach in number of function parameters");
     llvm::Function* callee = parent.mod.getFunction(join(e->path,'.'));
     if(!callee) throw CodeGenError("Could not find function target "+join(e->path,'.'));

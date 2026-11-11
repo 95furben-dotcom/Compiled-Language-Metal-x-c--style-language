@@ -37,6 +37,12 @@
 },
 {
   "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
+  "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/LibcFunctions.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/LibcFunctions.cpp",
+  "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/LibcFunctions.cpp",
+  "output": "CMakeFiles/my_program.dir/LLVMParser/LibcFunctions.cpp.o"
+},
+{
+  "directory": "/Users/benjamin/Documents/c++/CompiledLanguage/.cache/build",
   "command": "/usr/bin/c++  -I/opt/homebrew/Cellar/llvm/23.1.4/include -isystem /opt/homebrew/include -DLLVM_DISABLE_ABI_BREAKING_CHECKS=1 -std=c++23 -arch arm64   -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -o CMakeFiles/my_program.dir/LLVMParser/ValueBuilder.cpp.o -c /Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/ValueBuilder.cpp",
   "file": "/Users/benjamin/Documents/c++/CompiledLanguage/LLVMParser/ValueBuilder.cpp",
   "output": "CMakeFiles/my_program.dir/LLVMParser/ValueBuilder.cpp.o"

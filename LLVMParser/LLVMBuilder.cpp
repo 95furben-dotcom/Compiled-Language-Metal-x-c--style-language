@@ -102,6 +102,21 @@ void LLVMBuilder::DeclareFunctions() {
         auto* fnType = llvm::FunctionType::get(ret, paramTypes, false);
 
         llvm::Function::Create(fnType, llvm::Function::ExternalLinkage,
-                               join(f.path, '.'), mod);
+            join(f.path, '.'), mod);
+    }
+}
+
+void LLVMBuilder::DeclareStructTypes() {
+    // pass 1: opaque types, so order and recursion don't matter
+    for (auto& s : symbolScanner.structEntries)
+        structTypes[join(s.path, '.')] = llvm::StructType::create(ctx, join(s.path, '.'));
+
+    // pass 2: bodies. A by-value field needs its dependency's body set first,
+    // so process in dependency order (your SymbolScanner already sorts for sizes).
+    for (auto& s : symbolScanner.structEntries) {
+        std::vector<llvm::Type*> fields;
+        for (auto& f : s.fields)
+            fields.push_back(GetLLVMType(f.type, s.path));
+        structTypes[join(s.path, '.')]->setBody(fields);
     }
 }
