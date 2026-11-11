@@ -180,16 +180,27 @@ namespace Tokenizer{
             // it must be a self defined var
             return make_unique<definisionToken>(subject);
         }
-
+        
         if(c == '"'){
             index++; // consume "
             // generate string token
             std::string content = "";
             bool nextIsSlashed = false;
             while(nextIsSlashed || fileconts[index] != '"'){
-                if(nextIsSlashed) nextIsSlashed = false;
-                else if(fileconts[index] == '\\') nextIsSlashed = true;
-                content += fileconts[index];
+                if(nextIsSlashed){ 
+                    switch (fileconts[index]) {
+                        case '\\': content += '\\'; break;
+                        case 'n': content += '\n'; break;
+                        case 't': content += '\t'; break;
+                        default: throw tokenize_error("no spesial char for "+std::to_string(fileconts[index]));
+                    }
+                    nextIsSlashed = false;
+                }
+                else if(fileconts[index] == '\\'){ nextIsSlashed = true;}
+                else{
+                    content += fileconts[index];
+                }
+
                 index++;
                 if(index > fileconts.size() - 1)
                     throw tokenize_error("String never finished");

@@ -7,11 +7,12 @@
 #include "ASTParser/Debug/ASTPrinter.hpp"
 
 #include "LLVMParser/Symbolscanner/SymbolScanner.hpp"
-#include "LLVMParser/Symbolscanner/SymbolPrinter.hpp"
+#include "LLVMParser/Symbolscanner/SymbolPrinter.hpp" 
 #include <iostream>
 #include <stdexcept>
 
 int main(){
+    
     //  try {
         std::string fileconts = ReadFile("ProjectFolder/printf-example.cl");
         auto tokens = Tokenizer::tokenize(fileconts, 0);
@@ -43,7 +44,7 @@ int main(){
         llvmbuilder.mod.print(llvm::errs(), nullptr);
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
 
-        if(std::system("clang ProjectFolder/.cache/LLVMOutput.ll -o program") == 0)
+        if(std::system("clang -Wno-override-module ProjectFolder/.cache/LLVMOutput.ll -o program") == 0)
             std::system("./program; echo Return Value: $?");
 
     // } catch (const std::exception& e) {
