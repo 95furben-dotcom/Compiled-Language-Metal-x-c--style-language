@@ -1,5 +1,5 @@
 static int main(){
-    string a = "Hello, World!\n";
+    string a = "Olivia er dårlig :)\n";
     print(a);
     return 0;
 }
