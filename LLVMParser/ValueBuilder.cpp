@@ -111,9 +111,13 @@ LLVMBuilder::TypedValue LLVMBuilder::BuildValue(const ExprNode* node, const Path
                 return {llvm::ConstantInt::getBool(ty, false),n->type};
         }
         printf("Parsing value %s\n",n->value.c_str());
-        llvm::Constant* c = ty->isFloatingPointTy()
-            ? llvm::ConstantFP::get(ty, std::stod(n->value))
-            : llvm::ConstantInt::get(ty, std::stoll(n->value), isSigned(n->type));
+        llvm::Constant* c;
+        if (ty->isFloatTy())
+            c = llvm::ConstantFP::get(ty, (double)std::stof(n->value));   // round to float first
+        else if (ty->isDoubleTy())
+            c = llvm::ConstantFP::get(ty, std::stod(n->value));
+        else
+            c = llvm::ConstantInt::get(ty, std::stoll(n->value), isSigned(n->type));
         return {c, n->type};
     }
     if (auto* n = TryCast<OprandNode>(node)) {
