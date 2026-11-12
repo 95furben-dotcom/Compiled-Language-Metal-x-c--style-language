@@ -1,8 +1,4 @@
 static int main(){
-    int a = 2;
-    int b = -1;
-    if(a + b == 1){
-        return 0;
-    }
-    return 1;
+    float a = 0.1;
+    print(a,"\n");
 }
