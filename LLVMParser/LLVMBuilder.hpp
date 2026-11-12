@@ -3,6 +3,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Target/TargetMachine.h"
 #include <cstddef>
 #include <map>
 
@@ -22,6 +23,7 @@ struct LLVMBuilder{
         llvm::Type* llvmType;
         Vartype type;            
     };
+    std::unique_ptr<llvm::TargetMachine> targetMachine;
 
     llvm::LLVMContext ctx;
     llvm::Module mod = llvm::Module("program", ctx);
@@ -32,6 +34,7 @@ struct LLVMBuilder{
     static llvm::Function* mallocFn;
     static llvm::Function* freeFn;
     static llvm::Function* printfFn;
+    static llvm::Function* snprintfFn;
 
     std::map<std::string, llvm::StructType*> structTypes;
    
@@ -78,5 +81,8 @@ struct LLVMBuilder{
     struct FunctionBuilder;
 
     void WriteToFile(const std::string& filepath);
+
+    void WriteObjectFile(const std::string& path);
+    void InitTarget();
 };
 
