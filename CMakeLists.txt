@@ -47,6 +47,13 @@ add_executable(my_program ${SRC_FILES})
 target_include_directories(my_program PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(my_program PRIVATE ${LLVM_DEFINITIONS_LIST})
 
+find_package(LLVM REQUIRED CONFIG)
+llvm_map_components_to_libnames(LLVM_LIBS
+    core support irreader passes target codegen mc
+    native)          # "native" pulls in the AArch64/X86 backend for the host
+
+target_link_libraries(my_program PRIVATE ${LLVM_LIBS})
+
 # Pick the components you actually use (add more as needed)
 llvm_map_components_to_libnames(llvm_libs
     core support irreader passes analysis
