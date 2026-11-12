@@ -46,6 +46,12 @@ void fb::BuildFunction(){
     for(auto statement : functionNode->body->statements){
         BuildStatement(statement);
     }
+
+    if(join(path, '.') == "main"){
+        if(!entry->hasTerminator())
+            parent.builder.CreateRet(parent.builder.getInt32(0));
+    }
+
 }
 
 
