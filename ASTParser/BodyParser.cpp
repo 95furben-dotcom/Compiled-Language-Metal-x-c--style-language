@@ -14,7 +14,12 @@ Result<BodyNode*> ASTParser::GetBody(){
             break;
         
         // will go on until } sign
-        body.statements.push_back(TRY(GetStatementNode()));
+        auto statement = GetStatementNode();
+        if(!statement){ 
+            while(!is<endlToken>()){ index ++;}
+            index++;
+        }
+        body.statements.push_back(Ensure(statement));
     }
     TRY(expectSign('}'));
     return new BodyNode(body);
