@@ -7,6 +7,15 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/FileSystem.h"
 
+#include "llvm/MC/TargetRegistry.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/TargetParser/Host.h"
+#include "llvm/TargetParser/Triple.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/IR/LegacyPassManager.h"
+
+
 void LLVMBuilder::BuildNamespace(const NamespaceNode* namespaceNode, std::vector<std::string> path){
     for (const DeclNode *decl : namespaceNode->declarations) {
         if(auto* n = TryCast<NamespaceNode>(decl)){
@@ -119,4 +128,38 @@ void LLVMBuilder::DeclareStructTypes() {
             fields.push_back(GetLLVMType(f.type, s.path));
         structTypes[join(s.path, '.')]->setBody(fields);
     }
+}
+
+void LLVMBuilder::WriteObjectFile(const std::string& path) {
+    if (llvm::verifyModule(mod, &llvm::errs()))
+        throw CodeGenError("LLVM module verification failed");
+
+    std::error_code ec;
+    llvm::raw_fd_ostream out(path, ec, llvm::sys::fs::OF_None);   // binary, not OF_Text
+    if (ec) throw CodeGenError("Could not open " + path + ": " + ec.message());
+
+    llvm::legacy::PassManager pm;
+    if (targetMachine->addPassesToEmitFile(pm, out, nullptr,
+                                           llvm::CodeGenFileType::ObjectFile))
+                                           
+        throw CodeGenError("Target can't emit object files");
+    pm.run(mod);
+    out.flush();
+}
+
+void LLVMBuilder::InitTarget() {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+
+    llvm::Triple triple(llvm::sys::getDefaultTargetTriple());
+    std::string err;
+    const llvm::Target* target = llvm::TargetRegistry::lookupTarget(triple, err);
+    if (!target) throw CodeGenError("Target lookup failed: " + err);
+
+    llvm::TargetOptions opts;
+    targetMachine.reset(target->createTargetMachine(
+        triple, "generic", "", opts, llvm::Reloc::PIC_));
+
+    mod.setTargetTriple(triple);
+    mod.setDataLayout(targetMachine->createDataLayout());
 }

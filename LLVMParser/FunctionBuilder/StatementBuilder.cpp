@@ -4,6 +4,8 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Value.h"
+#include <algorithm>
+#include <cstddef>
 #include <vector>
 void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement){
     if(auto n =TryCast<VarDefNode>(statement)){
@@ -167,6 +169,10 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
 
         throw CodeGenError("No global or local with path: " + join(n->path,'.'));
     }
+    if(auto n = TryCast<StringNode>(node)){
+        
+        return {parent.builder.CreateGlobalString(n->value),Vartype::NewPtr(PrimitiveType::CHAR)};
+    }
 
     throw CodeGenError("Can not get allocator for this type of node");
 
@@ -180,19 +186,35 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
 }
 
 
-LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::EmitPrintf(const FuncCallNode* n){
-    if(n->params->params.size() != 1)
-        throw CodeGenError("Printf takes 1 statment, got "+std::to_string(n->params->params.size()));
-    auto alloca = GetAlloca(n->params->params[0]);
-    if(!alloca.type.IsString()) throw CodeGenError("Can not print non string");
-    auto str_ptr = parent.GetStructField(alloca, 0, path);
-    llvm::Value* str_c = parent.builder.CreateLoad(GetLLVMType(str_ptr.type),  str_ptr.value);
-    llvm::Value *returnValue = parent.builder.CreateCall(printfFn, {str_c});
-    return {returnValue,PrimitiveType::INT};
+void LLVMBuilder::FunctionBuilder::CreatePrintf(const FuncCallNode* fn){
+    if (fn->params->params.empty())
+        throw CodeGenError("print takes at least 1 argument");
+    for(auto* n : fn->params->params){
+        auto alloca = GetAlloca(n);
+        CreatePrintf(alloca);
+    }
+}
+
+void LLVMBuilder::FunctionBuilder::CreatePrintf(TypedValue alloca){
+    llvm::Value* str_c;
+    if(alloca.type.IsString()){
+        auto str_ptr = parent.GetStructField(alloca, 0, path);
+        str_c = parent.builder.CreateLoad(GetLLVMType(str_ptr.type),  str_ptr.value);
+    }else if(alloca.type.IsPointer() && alloca.type.pointee->primitivetype == PrimitiveType::CHAR){
+        str_c = alloca.value;
+    }
+    else{
+        alloca = CreateSnprintfFn(alloca);
+        str_c = alloca.value;
+    }
+    parent.builder.CreateCall(printfFn, {str_c});
 }
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncCallNode* n){
-    if(n->funcname == "print") return EmitPrintf(n);
+    if(n->funcname == "print"){ 
+        CreatePrintf(n);
+        return {nullptr, PrimitiveType::VOID};
+    }
     auto params = n->params->params;
     std::vector<llvm::Value*> args;
     auto e = parent.symbolScanner.FindFunction({n->funcname}, path);
@@ -210,5 +232,44 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncC
     llvm::Value *returnValue = parent.builder.CreateCall(callee, args);
 
     return {returnValue, e->returnType};
+}
 
+LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateSnprintfFn(TypedValue alloca){
+    if(!alloca.type.IsPrimitive()) throw CodeGenError("CreateSnprintfFn only print primitive");
+    auto& b = parent.builder;
+    llvm::Value* buffer = b.CreateAlloca(b.getInt8Ty(), b.getInt32(32), "snprint_buffer");
+
+    std::string format;
+    switch(alloca.type.primitivetype.value()){
+        case PrimitiveType::UCHAR:
+        case PrimitiveType::USHORT:
+        case PrimitiveType::UINT:
+        format = "%u"; break;
+        case PrimitiveType::CHAR:
+         case PrimitiveType::BOOL:
+        case PrimitiveType::SHORT:
+        case PrimitiveType::INT:
+            format = "%d"; break;
+        case PrimitiveType::LONG:
+            format = "%lld"; break;
+        case PrimitiveType::ULONG:
+            format = "%llu"; break;
+        case PrimitiveType::FLOAT:
+        case PrimitiveType::DOUBLE:
+            format = "%g"; break;
+        case PrimitiveType::VOID:
+            throw CodeGenError("Invalid type VOID in CreateSnprintfFn");
+    }
+    llvm::Value* fmtStr = b.CreateGlobalString(format,"snprint_format"); 
+
+    llvm::Value* value = b.CreateLoad(GetLLVMType(alloca.type),alloca.value,"snprint_value");
+
+    b.CreateCall(snprintfFn,{
+        buffer,
+        b.getInt64(32),
+        fmtStr,
+        value
+    });
+
+    return {buffer, Vartype::NewPtr(PrimitiveType::CHAR)};
 }

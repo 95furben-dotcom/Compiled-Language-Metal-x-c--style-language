@@ -3,6 +3,7 @@
 llvm::Function* LLVMBuilder::mallocFn = nullptr;
 llvm::Function* LLVMBuilder::freeFn   = nullptr;
 llvm::Function* LLVMBuilder::printfFn = nullptr;
+llvm::Function* LLVMBuilder::snprintfFn = nullptr;
 
 
 void LLVMBuilder::DeclareLibcFunctions(){
@@ -19,4 +20,8 @@ void LLVMBuilder::DeclareLibcFunctions(){
     printfFn = llvm::Function::Create(
         llvm::FunctionType::get(builder.getInt32Ty(), {ptrTy}, /*isVarArg=*/true),
         llvm::Function::ExternalLinkage, "printf", mod);
+    snprintfFn = llvm::Function::Create(
+    llvm::FunctionType::get(builder.getInt32Ty(),
+        {ptrTy, builder.getInt64Ty(), ptrTy}, /*isVarArg=*/true),
+    llvm::Function::ExternalLinkage, "snprintf", mod);
 }

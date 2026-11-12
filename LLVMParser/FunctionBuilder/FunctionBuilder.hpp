@@ -53,8 +53,9 @@ struct LLVMBuilder::FunctionBuilder
     // StatementBuilder
     void BuildStatement(const StatementNode* statement);
     TypedValue CreateFuncCall(const FuncCallNode* n);
-    LLVMBuilder::TypedValue EmitPrintf(const FuncCallNode* n);
-    
+    void CreatePrintf(const FuncCallNode* n);
+    void CreatePrintf(TypedValue alloca);
+    TypedValue CreateSnprintfFn(TypedValue alloca);
     //DO PUSHSCOPE BEFORE RUNNING
     void BuildLoop(const WhileNode* node, const AssignNode* iterator);
 
