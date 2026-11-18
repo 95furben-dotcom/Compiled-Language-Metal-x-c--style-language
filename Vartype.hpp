@@ -33,6 +33,9 @@ struct Vartype{
     bool IsPrimitive() const{
         return primitivetype.has_value();
     }
+    bool IsPrimitive(PrimitiveType t) const{
+        return primitivetype.has_value() && primitivetype.value() == t;
+    }
 
     Vartype(std::optional<PrimitiveType> primitivetype, std::optional<std::vector<std::string>> structPath, Vartype* vectorType,std::shared_ptr<Vartype> pointee = nullptr)
         : primitivetype(primitivetype), structPath(structPath), vectorType(vectorType), pointee(pointee){}
