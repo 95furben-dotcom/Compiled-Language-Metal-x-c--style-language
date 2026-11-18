@@ -10,7 +10,7 @@
 namespace Tokenizer{
 
     const std::string signs = "()[]{},."; 
-    const std::string operators = "+-=*/%<>";
+    const std::string operators = "+-=*/%<>!";
     const std::vector<std::string> specifiers = {"static","const","inline","_gpu","kernel"};
     
     class tokenize_error : public std::exception {
@@ -90,6 +90,10 @@ namespace Tokenizer{
                 if(c == '='){
                     index++;
                     return std::make_unique<operatorToken>("==");
+                }
+                if(c == '!'){
+                    index++;
+                    return std::make_unique<operatorToken>("!=");
                 }
                 return std::make_unique<assignmentToken>(c);
             }
@@ -209,7 +213,7 @@ namespace Tokenizer{
             index++; // consume "
             return make_unique<stringToken>(content);
         }
-        throw tokenize_error(std::string("Could not find token for \'") + c+"\'");
+        throw tokenize_error(std::string("Could not find token for '") + c+"' ");
     }
 
 
@@ -237,17 +241,17 @@ namespace Tokenizer{
                 while(fileconts[index] != '\n') index++;
                 RemoveSpace();
             }
-            try{
+            // try{
             std::unique_ptr<Token> t = getToken(fileconts, index);
                 t->lineIndex = lineIndex;
                 t->charIndex = index - lastNewLine - 1;
                 tokens.push_back(std::move(t));
                 RemoveSpace();
-            }
-            catch (tokenize_error e){
-                printf("%s",e.what());
-                return tokens;
-            }
+            // }
+            // catch (tokenize_error e){
+            //     printf("%s",e.what());
+            //     return tokens;
+            // }
            
         }
         return tokens;
