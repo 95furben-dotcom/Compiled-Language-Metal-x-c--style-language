@@ -6,7 +6,10 @@
 #include "llvm/IR/Value.h"
 #include <algorithm>
 #include <cstddef>
+#include <iostream>
 #include <vector>
+
+#include "../../ASTParser/Debug/ASTPrinter.hpp"
 void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement){
     if(auto n =TryCast<VarDefNode>(statement)){
         if((n->specifiers & Specifiers::STATIC) != 0)
@@ -20,7 +23,19 @@ void LLVMBuilder::FunctionBuilder::BuildStatement(const StatementNode* statement
             TypedValue v = BuildValue(n->value);
             init = parent.CastTo(v, n->type, path).value;
         }
-        else{
+        else if(n->type.vectorType){
+            auto dataPtr = parent.GetStructField({alloca,n->type}, 0, path);
+            auto sizePtr = parent.GetStructField({alloca,n->type}, 1, path);
+            auto capPtr = parent.GetStructField({alloca,n->type}, 2, path);
+            
+            llvm::Value* capVal = parent.builder.getInt64(8);
+            llvm::Value *mallocPtr = CreateMalloc({capVal, PrimitiveType::ULONG});
+            parent.builder.CreateStore(parent.builder.getInt64(0), sizePtr.value);
+            parent.builder.CreateStore(capVal, capPtr.value);
+            parent.builder.CreateStore(mallocPtr, dataPtr.value);
+            SetLocal(n->name, LocalVar{n->type, alloca});
+            return;
+        }else{
             init = llvm::Constant::getNullValue(ty);            
         }
         parent.builder.CreateStore(init, alloca); 
@@ -160,7 +175,6 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
         throw CodeGenError("No global or local with name: " + n->name);
         
     }
-
     if(auto n = TryCast<StaticMemberNode>(node)){
         auto varPath = n->path;
         GlobalVar *g = parent.FindGloabal(varPath);
@@ -173,12 +187,18 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::GetAlloca(const ExprNode* 
         
         return {parent.builder.CreateGlobalString(n->value),Vartype::NewPtr(PrimitiveType::CHAR)};
     }
-
-    throw CodeGenError("Can not get allocator for this type of node");
-
+   
+    
     if(auto n = TryCast<FuncCallNode>(node)){
-        throw CodeGenError("GetAlloca ExprNode-variation FuncCallNode uncounted for");
+        TypedValue v = CreateFuncCall(n);
+        auto alloca = parent.builder.CreateAlloca(GetLLVMType(v.type),nullptr, "tempAlloca");
+        parent.builder.CreateStore(v.value, alloca);
+        return{alloca,v.type};
     }
+
+    std::ostringstream s;
+    ASTPrinter::printExpr(s, node, {});
+    throw CodeGenError("Can not get allocator for this type of node:"+s.str());
     if(auto n = TryCast<InstanceMemberNode>(node)){
         throw CodeGenError("GetAlloca ExprNode-variation InstanceMemberNode uncounted for");
     }
@@ -211,6 +231,10 @@ void LLVMBuilder::FunctionBuilder::CreatePrintf(TypedValue alloca){
 }
 
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncCallNode* n){
+    if(auto f = TryCast<InstanceFuncCallNode>(n)){
+        return CreateInstanceFuncCall(f);
+    }
+
     if(n->funcname == "print"){ 
         CreatePrintf(n);
         return {nullptr, PrimitiveType::VOID};
@@ -234,42 +258,76 @@ LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateFuncCall(const FuncC
     return {returnValue, e->returnType};
 }
 
+LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateInstanceFuncCall(const InstanceFuncCallNode* n){
+    TypedValue alloca = GetAlloca(n->object);
+    if(alloca.type.vectorType){
+        if(n->funcname == "push_back"){
+            if(n->params->params.size() != 1) throw CodeGenError("vector.push_back takes only one argument");
+            CreatePushBack(alloca,BuildValue(n->params->params[0]));
+            return {nullptr, PrimitiveType::VOID};
+        }
+        if(n->funcname == "size"){
+            if(n->params->params.size() != 0) throw CodeGenError("vector.size() takes 0 arguments");
+            auto sizeF = parent.GetStructField(alloca, 1, path);
+            llvm::Value *sizeVal = parent.builder.CreateLoad(GetLLVMType(sizeF.type), sizeF.value, "sizeVal");
+            
+            if(alloca.type.vectorType->IsString()) parent.builder.CreateAnd(sizeVal,parent.builder.getInt64(~STR_CONST_FLAG));
+            return {sizeVal,sizeF.type};
+        }
+    }
+    throw CodeGenError("Invalid InstanceFuncCall: "+n->funcname);
+}
+
+
 LLVMBuilder::TypedValue LLVMBuilder::FunctionBuilder::CreateSnprintfFn(TypedValue alloca){
     if(!alloca.type.IsPrimitive()) throw CodeGenError("CreateSnprintfFn only print primitive");
     auto& b = parent.builder;
     llvm::Value* buffer = b.CreateAlloca(b.getInt8Ty(), b.getInt32(32), "snprint_buffer");
 
+    TypedValue v = {b.CreateLoad(GetLLVMType(alloca.type),alloca.value,"snprint_value"),alloca.type};
     std::string format;
     switch(alloca.type.primitivetype.value()){
         case PrimitiveType::UCHAR:
         case PrimitiveType::USHORT:
         case PrimitiveType::UINT:
-        format = "%u"; break;
+            format = "%u"; v = parent.CastTo(v, PrimitiveType::UINT, path); break;
         case PrimitiveType::CHAR:
-         case PrimitiveType::BOOL:
+        case PrimitiveType::BOOL:
         case PrimitiveType::SHORT:
         case PrimitiveType::INT:
-            format = "%d"; break;
+            format = "%d"; v = parent.CastTo(v, PrimitiveType::INT, path); break;
         case PrimitiveType::LONG:
             format = "%lld"; break;
         case PrimitiveType::ULONG:
             format = "%llu"; break;
         case PrimitiveType::FLOAT:
         case PrimitiveType::DOUBLE:
-            format = "%g"; break;
+            format = "%g"; v = parent.CastTo(v, PrimitiveType::DOUBLE, path); break;
         case PrimitiveType::VOID:
             throw CodeGenError("Invalid type VOID in CreateSnprintfFn");
     }
+    
     llvm::Value* fmtStr = b.CreateGlobalString(format,"snprint_format"); 
-
-    llvm::Value* value = b.CreateLoad(GetLLVMType(alloca.type),alloca.value,"snprint_value");
 
     b.CreateCall(snprintfFn,{
         buffer,
         b.getInt64(32),
         fmtStr,
-        value
+        v.value
     });
 
     return {buffer, Vartype::NewPtr(PrimitiveType::CHAR)};
+}
+
+llvm::Value* LLVMBuilder::FunctionBuilder::CreateMalloc(TypedValue size){
+    if(!size.type.IsPrimitive(PrimitiveType::ULONG)) throw CodeGenError("Can not CreateMalloc with size non ULONG");
+    auto& b = parent.builder;
+
+    return b.CreateCall(mallocFn, {size.value});
+}
+
+void LLVMBuilder::FunctionBuilder::CreateFree(TypedValue dataPtr){
+    if(!dataPtr.type.IsPointer()) throw CodeGenError("Can not Free with size non Pointer");
+    auto& b = parent.builder;
+    b.CreateCall(freeFn, {dataPtr.value});
 }

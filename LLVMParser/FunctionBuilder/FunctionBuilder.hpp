@@ -49,13 +49,20 @@ struct LLVMBuilder::FunctionBuilder
     void BuildFunction();
     const LocalVar* GetLocalVar(std::string target);
     TypedValue GetAlloca(const ExprNode* node);
+    uint GetVartypeSize(Vartype t){
+        return parent.symbolScanner.GetVartypeSize(t, path);
+    }
     
     // StatementBuilder
     void BuildStatement(const StatementNode* statement);
     TypedValue CreateFuncCall(const FuncCallNode* n);
+    LLVMBuilder::TypedValue CreateInstanceFuncCall(const InstanceFuncCallNode* n);
     void CreatePrintf(const FuncCallNode* n);
     void CreatePrintf(TypedValue alloca);
     TypedValue CreateSnprintfFn(TypedValue alloca);
+    llvm::Value* CreateMalloc(TypedValue size);
+    void CreateFree(TypedValue dataPtr);
+
     //DO PUSHSCOPE BEFORE RUNNING
     void BuildLoop(const WhileNode* node, const AssignNode* iterator);
 
@@ -64,4 +71,8 @@ struct LLVMBuilder::FunctionBuilder
     TypedValue BuildOprand(TypedValue a, TypedValue b, std::string op){
         return parent.BuildOprand(a,b,op,path);
     }
+
+    // VectorFunctions
+    void CreatePushBack(TypedValue vector, TypedValue v);
+    
 };
