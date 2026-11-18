@@ -58,6 +58,22 @@ static ExprNode* paramAt(const FuncCallParamsNode* params, size_t i) {
     return params->params[i];
 }
 
+static std::string escapeString(const std::string& s) {
+    std::string out;
+    for (char c : s) {
+        switch (c) {
+            case '\n': out += "\\n";  break;
+            case '\t': out += "\\t";  break;
+            case '\r': out += "\\r";  break;
+            case '\0': out += "\\0";  break;
+            case '\\': out += "\\\\"; break;
+            case '"':  out += "\\\""; break;
+            default:   out += c;      break;
+        }
+    }
+    return out;
+}
+
 static void printExpr(std::ostringstream& out, const ExprNode* node, std::vector<bool> ls) {
     appendIndent(out, ls);
     if (!node) { out << "(null)\n"; return; }
@@ -67,7 +83,7 @@ static void printExpr(std::ostringstream& out, const ExprNode* node, std::vector
         out << "NumberNode [" << n->value << ": "<<vartypeToString(n->type)<<"]\n";
 
     } else if (auto* n = dynamic_cast<const StringNode*>(node)) {
-        out << "StringNode \"" << n->value << "\"\n";
+        out << "StringNode \"" << escapeString(n->value) << "\"\n";
 
     } else if (auto* n = dynamic_cast<const OprandNode*>(node)) {
         out << "OprandNode \"" << n->oprand << "\"\n";
