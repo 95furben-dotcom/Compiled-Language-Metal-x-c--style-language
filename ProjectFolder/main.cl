@@ -26,7 +26,7 @@ static vector<int> PrimeFactorize(int x){
         if(x % i != 0){
             continue;
         }
-        if(isPrime(i)x){
+        if(isPrime(i)){
             while(x % i != 0){
                 factors.push_back(i);
                 x /= i;
