@@ -192,7 +192,7 @@ Result<StatementNode*> ASTParser::GetStatementNode(){
 Result<FuncCallParamsNode*> ASTParser::GetFuncCallParams(){
     if(isSign(')')){
         ADVANCE();
-        return {};
+        return new FuncCallParamsNode();
     }
     FuncCallParamsNode* params = new FuncCallParamsNode();
 

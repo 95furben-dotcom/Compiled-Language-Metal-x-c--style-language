@@ -36,8 +36,8 @@ struct BodyNode : Node{
 };
 
 struct FuncCallParamsNode : virtual Node{
-    FuncCallParamsNode():params(){};
-    std::vector<ExprNode*> params;
+    FuncCallParamsNode() : params(){};
+    std::vector<ExprNode*> params = std::vector<ExprNode*>();
 };
 
 
@@ -109,8 +109,8 @@ struct FunctionNode : MemberNode{
 };
 
 struct FuncCallNode : ExprNode, StatementNode{
-    FuncCallNode() : funcname(""), params(nullptr) {}
-    FuncCallNode(std::string funcname, FuncCallParamsNode* params = {})
+    FuncCallNode() : funcname(""), params(new FuncCallParamsNode()) {}
+    FuncCallNode(std::string funcname, FuncCallParamsNode* params = new FuncCallParamsNode())
         : funcname(funcname), params(params) {}
 
     std::string funcname;
@@ -160,7 +160,7 @@ struct StaticFuncCallNode : FuncCallNode {
 // shape.sum()  — instance method call
 struct InstanceFuncCallNode : FuncCallNode {
     InstanceFuncCallNode() : FuncCallNode("", {}), object(nullptr) {}
-    InstanceFuncCallNode(ExprNode* object, std::string funcname, FuncCallParamsNode* params = {})
+    InstanceFuncCallNode(ExprNode* object, std::string funcname, FuncCallParamsNode* params = new FuncCallParamsNode())
         : FuncCallNode(funcname, params), object(object) {}
 
     ExprNode* object = nullptr;
