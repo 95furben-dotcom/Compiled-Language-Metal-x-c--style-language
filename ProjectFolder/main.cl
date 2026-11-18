@@ -1,5 +1,5 @@
 static int main(){ 
-    return 0:
+    return 0;
 }
 
 static bool isPrime(int x){
@@ -26,7 +26,7 @@ static vector<int> PrimeFactorize(int x){
         if(x % i != 0){
             continue;
         }
-        if(isPrime(i)){
+        if(isPrime(i)x){
             while(x % i != 0){
                 factors.push_back(i);
                 x /= i;
