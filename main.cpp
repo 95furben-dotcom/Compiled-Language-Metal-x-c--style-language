@@ -14,7 +14,7 @@
 int main(){
     
     //  try {
-        std::string fileconts = ReadFile("ProjectFolder/val-print-example.cl");
+        std::string fileconts = ReadFile("ProjectFolder/main.cl");
         auto tokens = Tokenizer::tokenize(fileconts, 0);
         TokenPrinter::tokensToFile(tokens, "ProjectFolder/.cache/tokens.txt");
 
@@ -45,7 +45,7 @@ int main(){
         llvmbuilder.WriteObjectFile(".cache/program.o");
 
         int rc = std::system("cc .cache/program.o -o program");
-        if (rc == 0) std::system("./program; echo $?");
+        if (rc == 0) std::system("./program; echo error: $?");
 
     // } catch (const std::exception& e) {
     //     std::cerr << "error: " << e.what() << "\n";
