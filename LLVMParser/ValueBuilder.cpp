@@ -11,7 +11,7 @@
 #include <cstdio>
 #include <sys/types.h>
 
-constexpr uint64_t STR_CONST_FLAG = 1ull << 63;
+
 // real capacity = cap & ~STR_CONST_FLAG;  isConst = cap & STR_CONST_FLAG
 
 static bool isFloat(const Vartype& t) {
@@ -165,7 +165,7 @@ llvm::Constant* LLVMBuilder::BuildConstant(const ExprNode* node, const Vartype& 
     return c;
 }
 
-LLVMBuilder::TypedValue LLVMBuilder::GetStructField(TypedValue s, int fieldIdx, Path path){
+LLVMBuilder::TypedValue LLVMBuilder::GetStructField(const TypedValue s, int fieldIdx, Path path){
     if(s.type.vectorType){
         llvm::Value* fieldPtr = builder.CreateInBoundsGEP(
             GetLLVMType(s.type,path), 

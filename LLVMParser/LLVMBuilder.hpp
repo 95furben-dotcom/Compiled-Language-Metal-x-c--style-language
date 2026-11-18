@@ -9,7 +9,7 @@
 
 #include "../ASTParser/AST.hpp"
 #include "Symbolscanner/SymbolScanner.hpp"
-
+constexpr uint64_t STR_CONST_FLAG = 1ull << 63;
 struct LLVMBuilder{
     struct TypedValue {
         llvm::Value* value;
