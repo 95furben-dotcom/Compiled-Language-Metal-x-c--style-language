@@ -44,8 +44,8 @@ int main(){
         llvmbuilder.WriteToFile("ProjectFolder/.cache/LLVMOutput.ll");
         llvmbuilder.WriteObjectFile(".cache/program.o");
 
-        int rc = std::system("cc .cache/program.o -o program");
-        if (rc == 0) std::system("./program; echo error: $?");
+        int rc = std::system("cc .cache/program.o -o .cache/program");
+        if (rc == 0) std::system("./.cache/program; echo error: $?");
 
     // } catch (const std::exception& e) {
     //     std::cerr << "error: " << e.what() << "\n";
